@@ -35,6 +35,7 @@ namespace Reader.Data {
 
         public List<UserFeed> GetUserFeeds(string userName) {
             using (var ctx = new ReaderContext()) {
+                // TODO: don't return all items, Take(n)
                 return ctx.UserFeeds
                             .Include(uf => uf.Feed)
                             .Include(uf => uf.Items.Select(i => i.FeedItem))
