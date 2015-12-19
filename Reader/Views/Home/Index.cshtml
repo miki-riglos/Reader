@@ -1,0 +1,74 @@
+﻿@using Newtonsoft.Json;
+@using Newtonsoft.Json.Serialization;
+@model object
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<style>
+    .image-container {
+        display: inline-block;
+        width: 16px; 
+        height: 16px;
+    }
+    .image-container img {
+        width: 16px; 
+    }
+    tr.bold {
+        font-weight: bold;
+    }
+</style>
+
+<div id="readerApp" class="row">
+    <div class="col-md-4">
+        <ul data-bind="foreach: feeds" class="list-group">
+            <li data-bind="click: $parent.selectedFeed, css: { active: $data === $parent.selectedFeed() }" class="list-group-item">
+                <span class="image-container">
+                    <img data-bind="attr: { src: imageUrl }" />
+                </span>
+                <span data-bind="html: title"></span>
+                <span data-bind="text: unreadQuantity" class="badge"></span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="col-md-8">
+        <table data-bind="with: selectedFeed" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th data-bind="visible: showFeedTitle">Feed</th>
+                    <th>Title</th>
+                    <th>Publish Date</th>
+                    <th>Read</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: items">
+                <tr data-bind="css: { active: !isRead(), bold: !isRead() }">
+                    <td data-bind="html: feedTitle, visible: $parent.showFeedTitle"></td>
+                    <td><a data-bind="html: title, attr: { href: fullUrl }, click: markAsRead" target="_blank"></a></td>
+                    <td data-bind="html: publishDate"></td>
+                    <td><input type="checkbox" data-bind="checked: isRead" /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<form method="post" action="Home/AddFeed">
+    <input name="feedUrl" />
+    <input type="submit" />
+</form>
+
+
+
+
+@section scripts {
+    <script type="text/javascript" src="~/Scripts/require.js" data-main="@Url.Content("~/Reader.Scripts/main")"></script>
+
+    <script type="text/javascript">
+        define("readerData", [], function() {
+            return @Html.Raw(JsonConvert.SerializeObject(Model, new JsonSerializerSettings() { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+        });
+    </script>
+}
