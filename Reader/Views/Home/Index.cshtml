@@ -1,6 +1,7 @@
-﻿@using Newtonsoft.Json;
+﻿@using Reader.Models
+@using Newtonsoft.Json;
 @using Newtonsoft.Json.Serialization;
-@model object
+@model ReaderViewModel
 
 @{
     ViewBag.Title = "Home Page";
@@ -31,6 +32,12 @@
                 <span data-bind="text: unreadQuantity" class="badge"></span>
             </li>
         </ul>
+        <div class="form-inline">
+            <input data-bind="value: newFeedUrl" type="text" class="form-control" placeholder="New feed URL" />
+            <button data-bind="click: addFeed" class="btn btn-default">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </button>
+        </div>
     </div>
 
     <div class="col-md-8">
@@ -46,7 +53,7 @@
             <tbody data-bind="foreach: items">
                 <tr data-bind="css: { active: !isRead(), bold: !isRead() }">
                     <td data-bind="html: feedTitle, visible: $parent.showFeedTitle"></td>
-                    <td><a data-bind="html: title, attr: { href: fullUrl }, click: markAsRead" target="_blank"></a></td>
+                    <td><a data-bind="html: title, attr: { href: fullUrl, target: '_blank' }, click: markAsRead"></a></td>
                     <td data-bind="html: publishDate"></td>
                     <td><input type="checkbox" data-bind="checked: isRead" /></td>
                 </tr>
@@ -54,13 +61,6 @@
         </table>
     </div>
 </div>
-
-<form method="post" action="Home/AddFeed">
-    <input name="feedUrl" />
-    <input type="submit" />
-</form>
-
-
 
 
 @section scripts {

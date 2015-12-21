@@ -6,9 +6,9 @@ using System.Linq;
 using System.ServiceModel.Syndication;
 using System.Xml;
 
-namespace Reader.Data {
+namespace Reader.DataService {
 
-    public class ReaderData {
+    public class ReaderDataService {
 
         private Feed loadFeed(string feedUrl) {
             var feed = new Feed();

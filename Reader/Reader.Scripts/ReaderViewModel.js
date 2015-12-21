@@ -27,6 +27,8 @@
             self.items.push(new FeedItemViewModel(itemData, userFeedData.title));
         });
 
+        self.loadTime = userFeedData.loadTime;
+
         self.unreadQuantity = ko.computed(function() {
             return self.items().filter(function(item) { return !item.isRead(); }).length;
         });
@@ -54,6 +56,8 @@
             deferEvaluation: true
         });
 
+        self.loadTime = null;
+
         self.unreadQuantity = ko.computed({
             read: function() {
                 var allUnreadQuantity = 0;
@@ -73,8 +77,6 @@
     function ReaderViewModel(readerData) {
         var self = this;
 
-        self.loadTime = ko.observable(readerData.loadTime);
-
         self.feeds = ko.observableArray();
         readerData.feeds.forEach(function(feedData) {
             self.feeds.push(new FeedViewModel(feedData));
@@ -83,6 +85,11 @@
         self.feeds.unshift(new FeedAllViewModel(self.feeds));
 
         self.selectedFeed = ko.observable(self.feeds()[0]);
+
+        self.newFeedUrl = ko.observable();
+        self.addFeed = function() {
+
+        };
     }
 
     return ReaderViewModel;

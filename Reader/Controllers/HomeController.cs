@@ -7,7 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Data.Entity;
-using Reader.Data;
+using Reader.DataService;
 using Reader.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -17,38 +17,25 @@ namespace Reader.Controllers {
     [Authorize]
     public class HomeController : Controller {
 
-        ReaderData readerData = new ReaderData();
+        ReaderDataService readerDataService = new ReaderDataService();
 
         public ActionResult Index() {
-            var userFeeds = readerData.GetUserFeeds(User.Identity.Name);
+            var userFeeds = readerDataService.GetUserFeeds(User.Identity.Name);
+            var loadTime = DateTimeOffset.Now;
 
-            var readerViewModel = new {
-                LoadTime = DateTimeOffset.Now,
-                Feeds = userFeeds.Select(f => new {
-                    UserFeedId = f.UserFeedId,
-                    Title = f.Feed.Title,
-                    ImageUrl = f.Feed.ImageUrl,
-                    Items = f.Items.Select(i => new {
-                        UserFeedItemId = i.UserFeedItemId,
-                        FullUrl = i.FeedItem.GetFullUrl(),
-                        Title = i.FeedItem.Title,
-                        PublishDate = i.FeedItem.PublishDate,
-                        IsRead = i.IsRead
-                    })
-                })
-            };
+            var readerViewModel = new ReaderViewModel(userFeeds, loadTime);
 
             return View(readerViewModel);
         }
 
         [HttpPost]
         public JsonResult AddFeed(string feedUrl) {
-            // TODO: populate JsonResult
-            var result = new JsonResult();
+            var userFeed = readerDataService.AddUserFeed(User.Identity.Name, feedUrl);
+            var loadTime = DateTimeOffset.Now;
 
-            readerData.AddUserFeed(User.Identity.Name, feedUrl);
-
-            return result;
+            var feedViewModel = new UserFeedViewModel(userFeed, loadTime);
+            
+            return Json(feedViewModel);
         }
 
         public ActionResult About() {
