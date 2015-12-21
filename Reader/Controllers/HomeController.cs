@@ -28,16 +28,6 @@ namespace Reader.Controllers {
             return View(readerViewModel);
         }
 
-        [HttpPost]
-        public JsonResult AddFeed(string feedUrl) {
-            var userFeed = readerDataService.AddUserFeed(User.Identity.Name, feedUrl);
-            var loadTime = DateTimeOffset.Now;
-
-            var feedViewModel = new UserFeedViewModel(userFeed, loadTime);
-            
-            return Json(feedViewModel);
-        }
-
         public ActionResult About() {
             ViewBag.Message = "Reader Application";
             return View();

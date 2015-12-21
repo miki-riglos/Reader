@@ -45,4 +45,8 @@ namespace Reader.Models {
             Feeds = userFeeds.Select(uf => new UserFeedViewModel(uf, loadTime)).ToList();
         }
     }
+
+    public class AddUserFeedViewModel {
+        public string FeedUrl { get; set; }
+    }
 }

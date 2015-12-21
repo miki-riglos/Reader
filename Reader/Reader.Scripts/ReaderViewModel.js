@@ -1,4 +1,4 @@
-﻿define(['knockout'], function(ko) {
+﻿define(['knockout', 'readerDataService'], function(ko, readerDataService) {
 
     function FeedItemViewModel(userFeedItemData, feedTitle) {
         var self = this;
@@ -88,7 +88,14 @@
 
         self.newFeedUrl = ko.observable();
         self.addFeed = function() {
-
+            readerDataService.addFeed(self.newFeedUrl())
+                .then(function(data) {
+                    self.feeds.push(new FeedViewModel(data));
+                })
+                .catch(function(err) {
+                })
+                .finally(function() {
+                });
         };
     }
 
