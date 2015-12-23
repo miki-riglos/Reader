@@ -1,4 +1,5 @@
 ﻿using Reader.Entities;
+using Reader.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -35,12 +36,19 @@ namespace Reader.DataService {
 
         public List<UserFeed> GetUserFeeds(string userName) {
             using (var ctx = new ReaderContext()) {
-                // TODO: don't return all items, Take(n)
-                return ctx.UserFeeds
-                            .Include(uf => uf.Feed)
-                            .Include(uf => uf.Items.Select(i => i.FeedItem))
-                            .Where(uf => uf.UserName == userName)
-                            .ToList();
+                var userFeeds = ctx.UserFeeds
+                                    .Include(uf => uf.Feed)
+                                    .Where(uf => uf.UserName == userName)
+                                    .ToList();
+
+                foreach (var userFeed in userFeeds) {
+                    userFeed.Items = ctx.UserFeedItems
+                                        .Include(ufi => ufi.FeedItem)
+                                        .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
+                                        .ToList();
+                }
+
+                return userFeeds;
             }
         }
 
@@ -71,6 +79,25 @@ namespace Reader.DataService {
                 }
 
                 return userFeed;
+            }
+        }
+
+        public UserFeedItem UpdateUserFeedItem(string userName, UserFeedItemViewModel userFeedItemViewModel) {
+            using (var ctx = new ReaderContext()) {
+                // create user feed, if not exists
+                var userFeedItem = ctx.UserFeedItems
+                                        .Include(ufi => ufi.FeedItem)
+                                        .Include(ufi => ufi.UserFeed)
+                                        .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
+
+                if (userFeedItem.UserFeed.UserName != userName) {
+                    throw new ApplicationException("Invalid Feed Item.");
+                }
+
+                userFeedItem.IsRead = userFeedItemViewModel.IsRead;
+                ctx.SaveChanges();
+
+                return userFeedItem;
             }
         }
     }

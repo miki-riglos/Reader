@@ -5,8 +5,31 @@
         self.userFeedItemId = userFeedItemData.userFeedItemId;
         self.fullUrl = userFeedItemData.fullUrl;
         self.title = userFeedItemData.title;
+        // TODO: format date
         self.publishDate = userFeedItemData.publishDate;
-        self.isRead = ko.observable(userFeedItemData.isRead);
+
+        var _isRead = ko.observable(userFeedItemData.isRead);
+        self.isRead = ko.computed({
+            read: _isRead,
+            write: function() {
+                self.isRead.isEnabled(false);
+                var feedItem = {
+                    userFeedItemId: self.userFeedItemId,
+                    isRead: !_isRead()
+                }
+                readerDataService.updateFeedItem(feedItem)
+                    .then(function(data) {
+                        _isRead(data.isRead);
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                    })
+                    .finally(function() {
+                        self.isRead.isEnabled(true);
+                    });
+            }
+        });
+        self.isRead.isEnabled = ko.observable(true);
 
         self.feedTitle = feedTitle;
 
@@ -34,6 +57,10 @@
         });
 
         self.showFeedTitle = false;
+
+        // update + refresh
+        // load more items
+        // delete
     }
 
     function FeedAllViewModel(feeds) {
@@ -72,30 +99,45 @@
         });
 
         self.showFeedTitle = true;
+
+        // update + refresh all
     }
 
     function ReaderViewModel(readerData) {
         var self = this;
 
-        self.feeds = ko.observableArray();
+        // feeds
+        self.feeds = ko.observableArray([]);
         readerData.feeds.forEach(function(feedData) {
             self.feeds.push(new FeedViewModel(feedData));
         });
-
         self.feeds.unshift(new FeedAllViewModel(self.feeds));
 
         self.selectedFeed = ko.observable(self.feeds()[0]);
 
-        self.newFeedUrl = ko.observable();
+        // new feed
+        self.newFeedUrl = ko.observable(null);
         self.addFeed = function() {
+            self.alert(null);
+            self.addFeed.isEnabled(false);
             readerDataService.addFeed(self.newFeedUrl())
                 .then(function(data) {
                     self.feeds.push(new FeedViewModel(data));
+                    self.newFeedUrl(null);
                 })
                 .catch(function(err) {
+                    self.alert(err.message);
                 })
                 .finally(function() {
+                    self.addFeed.isEnabled(true);
                 });
+        };
+        self.addFeed.isEnabled = ko.observable(true);
+
+        // alert
+        self.alert = ko.observable(null);
+        self.clearAlert = function() {
+            self.alert(null);
         };
     }
 

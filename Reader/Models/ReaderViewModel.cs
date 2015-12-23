@@ -13,6 +13,8 @@ namespace Reader.Models {
         public DateTimeOffset PublishDate { get; set; }
         public bool IsRead { get; set; }
 
+        public UserFeedItemViewModel() { }
+
         public UserFeedItemViewModel(UserFeedItem userFeedItem) {
             UserFeedItemId = userFeedItem.UserFeedItemId;
             FullUrl = userFeedItem.FeedItem.GetFullUrl();

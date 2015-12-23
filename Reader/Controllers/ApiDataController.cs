@@ -26,5 +26,16 @@ namespace Reader.Controllers {
             
             return feedViewModel;
         }
+
+        [Route("api/UpdateFeedItem")]
+        [HttpPut]
+        public UserFeedItemViewModel UpdateFeedItem([FromBody]UserFeedItemViewModel userFeedItemViewModel) {
+            var userFeedItem = readerDataService.UpdateUserFeedItem(User.Identity.Name, userFeedItemViewModel);
+
+            var feedItemViewModel = new UserFeedItemViewModel(userFeedItem);
+
+            return feedItemViewModel;
+        }
+
     }
 }

@@ -16,7 +16,6 @@
                 var err = { message: errorThrown || textStatus };
                 if (jqXHR.responseJSON) {
                     err.message = jqXHR.responseJSON.exceptionMessage || jqXHR.responseJSON.message;
-                    err.editValidationErrors = jqXHR.responseJSON.editValidationErrors;
                 }
                 deferred.reject(err);
             }
