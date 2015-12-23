@@ -9,7 +9,9 @@ using System.Xml;
 
 namespace Reader.DataService {
 
-    public class ReaderDataService {
+    public class ReaderDataService : IDisposable {
+
+        private ReaderContext _readerContext = new ReaderContext();
 
         private Feed loadFeed(string feedUrl) {
             var feed = new Feed();
@@ -23,10 +25,10 @@ namespace Reader.DataService {
                 feed.LastUpdatedTime = syndicationFeed.LastUpdatedTime;
                 feed.LoadTime = loadTime;
 
-                feed.Items = syndicationFeed.Items.Select(i => new FeedItem() {
-                    Url = i.Links.Last().Uri.OriginalString, 
+                feed.Items = syndicationFeed.Items.Reverse().Select(i => new FeedItem() {
+                    Url = i.Links.Last().Uri.OriginalString,
                     Title = i.Title.Text,
-                    PublishDate = i.PublishDate,
+                    PublishDate = i.PublishDate > DateTimeOffset.MinValue ? i.PublishDate : i.LastUpdatedTime,
                     LoadTime = loadTime
                 }).ToList();
             }
@@ -34,87 +36,159 @@ namespace Reader.DataService {
             return feed;
         }
 
-        public List<UserFeed> GetUserFeeds(string userName) {
-            using (var ctx = new ReaderContext()) {
-                var userFeeds = ctx.UserFeeds
-                                    .Include(uf => uf.Feed)
-                                    .Where(uf => uf.UserName == userName)
-                                    .ToList();
+        private void refreshFeed(int feedId) {
+            var feedToUpdate = _readerContext.Feeds.First(f => f.FeedId == feedId);
+            var freshFeed = loadFeed(feedToUpdate.Url);
 
-                foreach (var userFeed in userFeeds) {
-                    userFeed.Items = ctx.UserFeedItems
-                                        .Include(ufi => ufi.FeedItem)
-                                        .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
-                                        .ToList();
+            feedToUpdate.Title = freshFeed.Title;
+            feedToUpdate.ImageUrl = freshFeed.ImageUrl;
+            feedToUpdate.LoadTime = freshFeed.LoadTime;
+
+            foreach (var feedItem in freshFeed.Items) {
+                if (!_readerContext.FeedItems.Any(fi => fi.Url == feedItem.Url)) {
+                    feedItem.FeedId = feedToUpdate.FeedId;
+                    _readerContext.FeedItems.Add(feedItem);
                 }
-
-                return userFeeds;
             }
+
+            _readerContext.SaveChanges();
+        }
+
+        public List<UserFeed> GetUserFeeds(string userName) {
+            var userFeeds = _readerContext.UserFeeds
+                                            .Include(uf => uf.Feed)
+                                            .Where(uf => uf.UserName == userName)
+                                            .ToList();
+
+            foreach (var userFeed in userFeeds) {
+                userFeed.Items = _readerContext.UserFeedItems
+                                                .Include(ufi => ufi.FeedItem)
+                                                .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
+                                                .OrderByDescending(ufi => ufi.FeedItemId)
+                                                .Take(20)
+                                                .ToList();
+            }
+
+            return userFeeds;
         }
 
         public UserFeed AddUserFeed(string userName, string feedUrl) {
-            using (var ctx = new ReaderContext()) {
-                // load or create feed
-                var feed = ctx.Feeds.Include(f => f.Items).FirstOrDefault(f => f.Url == feedUrl);
-                if (feed == null) {
-                    feed = loadFeed(feedUrl);
-                    ctx.Feeds.Add(feed);
-                    ctx.SaveChanges();
-                }
-
-                // create user feed, if not exists
-                var userFeed = ctx.UserFeeds.FirstOrDefault(uf => uf.UserName == userName && uf.FeedId == feed.FeedId);
-                if (userFeed == null) {
-                    userFeed = new UserFeed() {
-                        UserName = userName,
-                        Feed = feed,
-                        Items = feed.Items.Select(i => new UserFeedItem() {
-                            FeedItemId = i.FeedItemId,
-                            IsRead = false
-                        }).ToList()
-                    };
-
-                    ctx.UserFeeds.Add(userFeed);
-                    ctx.SaveChanges();
-                }
-
-                return userFeed;
+            // load or create feed
+            var feed = _readerContext.Feeds.Include(f => f.Items).FirstOrDefault(f => f.Url == feedUrl);
+            if (feed == null) {
+                feed = loadFeed(feedUrl);
+                _readerContext.Feeds.Add(feed);
+                _readerContext.SaveChanges();
             }
+
+            // create user feed, if not exists
+            var userFeed = _readerContext.UserFeeds.FirstOrDefault(uf => uf.UserName == userName && uf.FeedId == feed.FeedId);
+            if (userFeed != null) {
+                throw new ApplicationException("User Feed already exists.");
+            }
+            userFeed = new UserFeed() {
+                UserName = userName,
+                Feed = feed,
+                Items = feed.Items.Select(i => new UserFeedItem() {
+                    FeedItemId = i.FeedItemId,
+                    IsRead = false
+                }).ToList()
+            };
+            userFeed.Items = userFeed.Items.OrderByDescending(ufi => ufi.FeedItemId).ToList();
+
+            _readerContext.UserFeeds.Add(userFeed);
+            _readerContext.SaveChanges();
+
+            return userFeed;
+        }
+
+        public UserFeed RefreshUserFeed(string userName, int userFeedId) {
+            var userFeed = _readerContext.UserFeeds
+                                            .Include(uf => uf.Items)
+                                            .First(uf => uf.UserFeedId == userFeedId);
+                
+            if (userFeed.UserName != userName) {
+                throw new ApplicationException("Invalid User Feed Id.");
+            }
+
+            // refresh feed
+            refreshFeed(userFeed.FeedId);
+
+            // insert new user feed items 
+            var recentFeedItems = _readerContext
+                                    .FeedItems
+                                    .Where(fi => !_readerContext.UserFeedItems
+                                                                .Where(ufi => ufi.UserFeedId == userFeedId)
+                                                                .Select(ufi => ufi.FeedItemId)
+                                                                .Contains(fi.FeedItemId));
+            foreach (var recentFeedItem in recentFeedItems) {
+                var userFeedItem = new UserFeedItem();
+                userFeedItem.UserFeedId = userFeedId;
+                userFeedItem.FeedItemId = recentFeedItem.FeedItemId;
+                userFeedItem.IsRead = false;
+                _readerContext.UserFeedItems.Add(userFeedItem);
+            }
+            _readerContext.SaveChanges();
+
+            // re-load user feed with fresh items
+            userFeed = _readerContext.UserFeeds
+                                        .Include(uf => uf.Feed)
+                                        .First(uf => uf.UserFeedId == userFeedId);
+
+            userFeed.Items = _readerContext.UserFeedItems
+                                            .Include(ufi => ufi.FeedItem)
+                                            .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
+                                            .OrderByDescending(ufi => ufi.FeedItemId)
+                                            .Take(20)
+                                            .ToList();
+
+            return userFeed;
         }
 
         public int DeleteUserFeed(string userName, int userFeedId) {
-            using (var ctx = new ReaderContext()) {
-                var userFeed = ctx.UserFeeds
-                                    .Include(uf => uf.Items)
-                                    .First(uf => uf.UserFeedId == userFeedId);
-
-                if (userFeed.UserName != userName) {
-                    throw new ApplicationException("Invalid User Feed Id.");
-                }
-
-                ctx.UserFeeds.Remove(userFeed);
-                var deleteResult = ctx.SaveChanges();
-
-                return deleteResult;
+            var userFeed = _readerContext.UserFeeds.Include(uf => uf.Items).First(uf => uf.UserFeedId == userFeedId);
+                
+            if (userFeed.UserName != userName) {
+                throw new ApplicationException("Invalid User Feed Id.");
             }
+
+            _readerContext.UserFeeds.Remove(userFeed);
+            var deleteResult = _readerContext.SaveChanges();
+
+            return deleteResult;
         }
 
         public UserFeedItem UpdateUserFeedItem(string userName, UserFeedItemViewModel userFeedItemViewModel) {
-            using (var ctx = new ReaderContext()) {
-                var userFeedItem = ctx.UserFeedItems
-                                        .Include(ufi => ufi.FeedItem)
-                                        .Include(ufi => ufi.UserFeed)
-                                        .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
+            var userFeedItem = _readerContext.UserFeedItems
+                                                .Include(ufi => ufi.FeedItem)
+                                                .Include(ufi => ufi.UserFeed)
+                                                .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
 
-                if (userFeedItem.UserFeed.UserName != userName) {
-                    throw new ApplicationException("Invalid User Feed Item.");
-                }
-
-                userFeedItem.IsRead = userFeedItemViewModel.IsRead;
-                ctx.SaveChanges();
-
-                return userFeedItem;
+            if (userFeedItem.UserFeed.UserName != userName) {
+                throw new ApplicationException("Invalid User Feed Item.");
             }
+
+            userFeedItem.IsRead = userFeedItemViewModel.IsRead;
+            _readerContext.SaveChanges();
+
+            return userFeedItem;
+        }
+
+        // IDisposable implementation
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
+                    _readerContext.Dispose();
+                }
+            }
+            this.disposed = true;
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

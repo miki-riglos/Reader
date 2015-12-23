@@ -27,13 +27,24 @@ namespace Reader.Controllers {
             return feedViewModel;
         }
 
+        [Route("api/UserFeed/{userFeedId}/refresh")]
+        [HttpPost]
+        public UserFeedViewModel RefreshUserFeed(int userFeedId) {
+            var userFeed = readerDataService.RefreshUserFeed(User.Identity.Name, userFeedId);
+            var loadTime = DateTimeOffset.Now;
+
+            var feedViewModel = new UserFeedViewModel(userFeed, loadTime);
+
+            return feedViewModel;
+        }
+
         [Route("api/UserFeed/{userFeedId}")]
         [HttpDelete]
         public int DeleteUserFeed(int userFeedId) {
             var deleteResult = readerDataService.DeleteUserFeed(User.Identity.Name, userFeedId);
             return deleteResult;
         }
-
+        
         [Route("api/UserFeedItem")]
         [HttpPut]
         public UserFeedItemViewModel UpdateUserFeedItem([FromBody]UserFeedItemViewModel userFeedItemViewModel) {
@@ -43,6 +54,5 @@ namespace Reader.Controllers {
 
             return feedItemViewModel;
         }
-
     }
 }

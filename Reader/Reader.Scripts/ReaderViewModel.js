@@ -1,6 +1,6 @@
 ﻿define(['knockout', 'readerDataService'], function(ko, readerDataService) {
 
-    function UserFeedItemViewModel(userFeedItemData, feedTitle) {
+    function UserFeedItemViewModel(userFeedItemData, feedTitle, readerViewModel) {
         var self = this;
         self.userFeedItemId = userFeedItemData.userFeedItemId;
         self.fullUrl = userFeedItemData.fullUrl;
@@ -22,7 +22,7 @@
                         _isRead(data.isRead);
                     })
                     .catch(function(err) {
-                        console.log(err);
+                        readerViewModel.alert(err.message);
                     })
                     .finally(function() {
                         self.isRead.isEnabled(true);
@@ -41,11 +41,11 @@
         };
     }
 
-    function UserFeedViewModel(userFeedData) {
+    function UserFeedViewModel(userFeedData, readerViewModel) {
         var self = this;
         self.userFeedId = userFeedData.userFeedId;
-        self.title = userFeedData.title;
-        self.imageUrl = userFeedData.imageUrl;
+        self.title = ko.observable(userFeedData.title);
+        self.imageUrl = ko.observable(userFeedData.imageUrl);
         
         self.items = ko.observableArray();
         userFeedData.items.forEach(function(itemData) {
@@ -60,9 +60,49 @@
 
         self.showFeedTitle = false;
 
-        // update + refresh
-        // load more items
+        // refresh
+        self.refresh = function() {
+            readerViewModel.alert(null);
+            self.refresh.isEnabled(false);
+            readerDataService.refreshUserFeed(self.userFeedId)
+                .then(function(data) {
+                    self.title(data.title);
+                    self.imageUrl(data.imageUrl);
+                    data.items.reverse().forEach(function(itemData) {
+                        if (self.items().filter(function(item) { return item.userFeedItemId === itemData.userFeedItemId; }).length === 0) {
+                            self.items.unshift(new UserFeedItemViewModel(itemData, userFeedData.title));
+                        }
+                    });
+                    self.loadTime = data.loadTime;
+                })
+                .catch(function(err) {
+                    readerViewModel.alert(err.message);
+                })
+                .finally(function() {
+                    self.refresh.isEnabled(true);
+                });
+        };
+        self.refresh.isEnabled = ko.observable(true);
+
         // delete
+        self.remove = function() {
+            readerViewModel.alert(null);
+            self.remove.isEnabled(false);
+            readerDataService.deleteUserFeed(self.userFeedId)
+                .then(function(data) {
+                    readerViewModel.selectedUserFeed(readerViewModel.userFeeds()[0]);
+                    readerViewModel.userFeeds.remove(self);
+                })
+                .catch(function(err) {
+                    readerViewModel.alert(err.message);
+                })
+                .finally(function() {
+                    self.remove.isEnabled(true);
+                });
+        };
+        self.remove.isEnabled = ko.observable(true);
+
+        // load more items
     }
 
     function UserFeedAllViewModel(feeds) {
@@ -111,11 +151,17 @@
         // user feeds
         self.userFeeds = ko.observableArray([]);
         readerData.userFeeds.forEach(function(userFeedData) {
-            self.userFeeds.push(new UserFeedViewModel(userFeedData));
+            self.userFeeds.push(new UserFeedViewModel(userFeedData, self));
         });
         self.userFeeds.unshift(new UserFeedAllViewModel(self.userFeeds));
 
         self.selectedUserFeed = ko.observable(self.userFeeds()[0]);
+
+        // edit mode
+        self.editMode = ko.observable(false);
+        self.toggleEditMode = function() {
+            self.editMode(!self.editMode());
+        };
 
         // new feed
         self.newUserFeedUrl = ko.observable(null);
@@ -124,7 +170,7 @@
             self.addUserFeed.isEnabled(false);
             readerDataService.addUserFeed(self.newUserFeedUrl())
                 .then(function(data) {
-                    self.userFeeds.push(new UserFeedViewModel(data));
+                    self.userFeeds.push(new UserFeedViewModel(data, self));
                     self.newUserFeedUrl(null);
                 })
                 .catch(function(err) {
@@ -135,25 +181,6 @@
                 });
         };
         self.addUserFeed.isEnabled = ko.observable(true);
-
-        // delete feed
-        self.deleteUserFeed = function() {
-            self.alert(null);
-            self.deleteUserFeed.isEnabled(false);
-            var userFeedToDelete = self.selectedUserFeed();
-            readerDataService.deleteUserFeed(userFeedToDelete.userFeedId)
-                .then(function(data) {
-                    self.selectedUserFeed(self.userFeeds()[0]);
-                    self.userFeeds.remove(userFeedToDelete);
-                })
-                .catch(function(err) {
-                    self.alert(err.message);
-                })
-                .finally(function() {
-                    self.deleteUserFeed.isEnabled(true);
-                });
-        };
-        self.deleteUserFeed.isEnabled = ko.observable(true);
 
         // alert
         self.alert = ko.observable(null);

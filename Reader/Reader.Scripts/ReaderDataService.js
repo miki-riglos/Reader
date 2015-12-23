@@ -8,6 +8,11 @@
         return promise;
     }
 
+    function refreshUserFeed(userFeedId) {
+        var promise = request(BASE_URI + 'UserFeed/' + userFeedId + '/refresh', 'POST');
+        return promise;
+    }
+
     function deleteUserFeed(userFeedId) {
         var promise = request(BASE_URI + 'UserFeed/' + userFeedId, 'DELETE');
         return promise;
@@ -21,6 +26,7 @@
 
     return {
         addUserFeed: addUserFeed,
+        refreshUserFeed: refreshUserFeed,
         deleteUserFeed: deleteUserFeed,
         updateUserFeedItem: updateUserFeedItem
     };
