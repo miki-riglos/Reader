@@ -41,10 +41,10 @@ namespace Reader.Models {
     }
 
     public class ReaderViewModel {
-        public List<UserFeedViewModel> Feeds { get; set; }
+        public List<UserFeedViewModel> UserFeeds { get; set; }
 
         public ReaderViewModel(List<UserFeed> userFeeds, DateTimeOffset loadTime) {
-            Feeds = userFeeds.Select(uf => new UserFeedViewModel(uf, loadTime)).ToList();
+            UserFeeds = userFeeds.Select(uf => new UserFeedViewModel(uf, loadTime)).ToList();
         }
     }
 

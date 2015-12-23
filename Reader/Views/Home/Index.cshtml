@@ -22,7 +22,7 @@
             width: 16px;
         }
 
-    #newFeedUrl {
+    #newUserFeedUrl {
         width: 245px;
     }
 
@@ -34,8 +34,8 @@
 <div id="readerApp" class="row">
     <div class="col-md-4">
         <!-- feeds -->
-        <ul data-bind="foreach: feeds" class="list-group">
-            <li data-bind="click: $parent.selectedFeed, css: { active: $data === $parent.selectedFeed() }" class="list-group-item">
+        <ul data-bind="foreach: userFeeds" class="list-group">
+            <li data-bind="click: $parent.selectedUserFeed, css: { active: $data === $parent.selectedUserFeed() }" class="list-group-item">
                 <span class="image-container">
                     <img data-bind="attr: { src: imageUrl }" />
                 </span>
@@ -46,9 +46,14 @@
 
         <!-- add feed -->
         <div class="form-inline">
-            <input data-bind="value: newFeedUrl, enable: addFeed.isEnabled" type="text" id="newFeedUrl" class="form-control" placeholder="New feed URL" />
-            <button data-bind="click: addFeed, enable: addFeed.isEnabled" class="btn btn-default">
+            <input data-bind="value: newUserFeedUrl, enable: addUserFeed.isEnabled" type="text" id="newUserFeedUrl" class="form-control" placeholder="New feed URL" />
+            <button data-bind="click: addUserFeed, enable: addUserFeed.isEnabled" class="btn btn-default">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="form-inline">
+            <button data-bind="click: deleteUserFeed, enable: deleteUserFeed.isEnabled" class="btn btn-danger">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             </button>
         </div>
 
@@ -63,7 +68,7 @@
 
     <div class="col-md-8">
         <!-- feed items -->
-        <table data-bind="with: selectedFeed" class="table table-bordered">
+        <table data-bind="with: selectedUserFeed" class="table table-bordered">
             <thead>
                 <tr>
                     <th data-bind="visible: showFeedTitle">Feed</th>

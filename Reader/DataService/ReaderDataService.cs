@@ -82,16 +82,32 @@ namespace Reader.DataService {
             }
         }
 
+        public int DeleteUserFeed(string userName, int userFeedId) {
+            using (var ctx = new ReaderContext()) {
+                var userFeed = ctx.UserFeeds
+                                    .Include(uf => uf.Items)
+                                    .First(uf => uf.UserFeedId == userFeedId);
+
+                if (userFeed.UserName != userName) {
+                    throw new ApplicationException("Invalid User Feed Id.");
+                }
+
+                ctx.UserFeeds.Remove(userFeed);
+                var deleteResult = ctx.SaveChanges();
+
+                return deleteResult;
+            }
+        }
+
         public UserFeedItem UpdateUserFeedItem(string userName, UserFeedItemViewModel userFeedItemViewModel) {
             using (var ctx = new ReaderContext()) {
-                // create user feed, if not exists
                 var userFeedItem = ctx.UserFeedItems
                                         .Include(ufi => ufi.FeedItem)
                                         .Include(ufi => ufi.UserFeed)
                                         .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
 
                 if (userFeedItem.UserFeed.UserName != userName) {
-                    throw new ApplicationException("Invalid Feed Item.");
+                    throw new ApplicationException("Invalid User Feed Item.");
                 }
 
                 userFeedItem.IsRead = userFeedItemViewModel.IsRead;

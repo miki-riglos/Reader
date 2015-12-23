@@ -2,20 +2,26 @@
 
     var BASE_URI = '../api/';
 
-    function addFeed(feedUrl) {
+    function addUserFeed(feedUrl) {
         var data = { feedUrl: feedUrl };
-        var promise = request(BASE_URI + 'AddFeed', 'POST', JSON.stringify(data));
+        var promise = request(BASE_URI + 'UserFeed', 'POST', JSON.stringify(data));
         return promise;
     }
 
-    function updateFeedItem(feedItem) {
-        var data = feedItem;
-        var promise = request(BASE_URI + 'UpdateFeedItem', 'PUT', JSON.stringify(data));
+    function deleteUserFeed(userFeedId) {
+        var promise = request(BASE_URI + 'UserFeed/' + userFeedId, 'DELETE');
+        return promise;
+    }
+
+    function updateUserFeedItem(userFeedItem) {
+        var data = userFeedItem;
+        var promise = request(BASE_URI + 'UserFeedItem', 'PUT', JSON.stringify(data));
         return promise;
     }
 
     return {
-        addFeed: addFeed,
-        updateFeedItem: updateFeedItem
+        addUserFeed: addUserFeed,
+        deleteUserFeed: deleteUserFeed,
+        updateUserFeedItem: updateUserFeedItem
     };
 });

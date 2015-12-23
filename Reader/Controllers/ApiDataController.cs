@@ -16,9 +16,9 @@ namespace Reader.Controllers {
 
         ReaderDataService readerDataService = new ReaderDataService();
 
-        [Route("api/AddFeed")]
+        [Route("api/UserFeed")]
         [HttpPost]
-        public UserFeedViewModel AddFeed([FromBody]AddUserFeedViewModel addUserFeedViewModel) {
+        public UserFeedViewModel AddUserFeed([FromBody]AddUserFeedViewModel addUserFeedViewModel) {
             var userFeed = readerDataService.AddUserFeed(User.Identity.Name, addUserFeedViewModel.FeedUrl);
             var loadTime = DateTimeOffset.Now;
 
@@ -27,9 +27,16 @@ namespace Reader.Controllers {
             return feedViewModel;
         }
 
-        [Route("api/UpdateFeedItem")]
+        [Route("api/UserFeed/{userFeedId}")]
+        [HttpDelete]
+        public int DeleteUserFeed(int userFeedId) {
+            var deleteResult = readerDataService.DeleteUserFeed(User.Identity.Name, userFeedId);
+            return deleteResult;
+        }
+
+        [Route("api/UserFeedItem")]
         [HttpPut]
-        public UserFeedItemViewModel UpdateFeedItem([FromBody]UserFeedItemViewModel userFeedItemViewModel) {
+        public UserFeedItemViewModel UpdateUserFeedItem([FromBody]UserFeedItemViewModel userFeedItemViewModel) {
             var userFeedItem = readerDataService.UpdateUserFeedItem(User.Identity.Name, userFeedItemViewModel);
 
             var feedItemViewModel = new UserFeedItemViewModel(userFeedItem);
