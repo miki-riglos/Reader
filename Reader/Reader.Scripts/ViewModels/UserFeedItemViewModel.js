@@ -16,16 +16,7 @@
                     userFeedItemId: self.userFeedItemId,
                     isRead: !_isRead()
                 };
-                readerDataService.updateUserFeedItem(userFeedItem)
-                    .then(function(data) {
-                        _isRead(data.isRead);
-                    })
-                    .catch(function(err) {
-                        readerViewModel.alert(err.message);
-                    })
-                    .finally(function() {
-                        self.isRead.isEnabled(true);
-                    });
+                updateUserFeedItem(userFeedItem);
             }
         });
         self.isRead.isEnabled = ko.observable(true);
@@ -38,6 +29,27 @@
             }
             return true;    // don't prevent default, allow click on anchor
         };
+
+        self.updateIsRead = function(isRead) {
+            var userFeedItem = {
+                userFeedItemId: self.userFeedItemId,
+                isRead: isRead
+            };
+            return updateUserFeedItem(userFeedItem);
+        }
+
+        function updateUserFeedItem(userFeedItem) {
+            return readerDataService.updateUserFeedItem(userFeedItem)
+                .then(function(data) {
+                    _isRead(data.isRead);
+                })
+                .catch(function(err) {
+                    readerViewModel.alert(err.message);
+                })
+                .finally(function() {
+                    self.isRead.isEnabled(true);
+                });
+        }
     }
 
     return UserFeedItemViewModel;

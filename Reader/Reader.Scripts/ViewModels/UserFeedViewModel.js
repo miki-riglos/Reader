@@ -1,4 +1,4 @@
-﻿define(['knockout', './UserFeedItemViewModel', 'DataService/readerDataService'], function(ko, UserFeedItemViewModel, readerDataService) {
+﻿define(['Q', 'knockout', './UserFeedItemViewModel', 'DataService/readerDataService'], function(Q, ko, UserFeedItemViewModel, readerDataService) {
 
     function UserFeedViewModel(userFeedData, readerViewModel) {
         var self = this;
@@ -39,6 +39,24 @@
                 });
         };
         self.refresh.isEnabled = ko.observable(true);
+
+        // update all items as read sequentially
+        self.updateItemsAsRead = function() {
+            var promise = Q();
+            readerViewModel.alert(null);
+            self.updateItemsAsRead.isEnabled(false);
+            self.items().forEach(function(item) {
+                if (!item.isRead()) {
+                    promise = promise.then(function() {
+                        return item.updateIsRead(true);
+                    });
+                }
+            });
+            promise.then(function() {
+                self.updateItemsAsRead.isEnabled(true);
+            });
+        };
+        self.updateItemsAsRead.isEnabled = ko.observable(true);
 
         // load more items
         self.loadItems = function() {

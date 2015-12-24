@@ -11,7 +11,7 @@ namespace Reader.DataService {
 
     public class ReaderDataService : IDisposable {
 
-        private const int PAGE_ROWS = 10;
+        private const int PAGE_ROWS = 30;
 
         private ReaderContext _readerContext = new ReaderContext();
 
