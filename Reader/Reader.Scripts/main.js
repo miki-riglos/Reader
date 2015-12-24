@@ -8,7 +8,7 @@
 
 define('jquery', function() { return jQuery; });    // already loaded in _layout.cshtml
 
-require(['knockout', 'readerData', 'ReaderViewModel'], function(ko, readerData, ReaderViewModel) {
+require(['knockout', 'readerData', 'ViewModels/ReaderViewModel'], function(ko, readerData, ReaderViewModel) {
     var readerViewModel = new ReaderViewModel(readerData);
     ko.applyBindings(readerViewModel, document.getElementById('readerApp'));
 });

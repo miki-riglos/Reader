@@ -1,5 +1,5 @@
 ﻿using Reader.Entities;
-using Reader.Models;
+using Reader.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;

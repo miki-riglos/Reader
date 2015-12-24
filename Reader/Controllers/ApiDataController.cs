@@ -1,12 +1,7 @@
 ﻿using Reader.DataService;
-using Reader.Entities;
-using Reader.Models;
-using System;
+using Reader.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace Reader.Controllers {

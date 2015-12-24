@@ -1,4 +1,4 @@
-﻿define(['request'], function(request) {
+﻿define(['Transfer/request'], function(request) {
 
     var BASE_URI = '../api/';
 

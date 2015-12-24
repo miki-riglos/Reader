@@ -1,16 +1,6 @@
-﻿using Reader.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceModel.Syndication;
-using System.Web;
+﻿using Reader.DataService;
+using Reader.ViewModels;
 using System.Web.Mvc;
-using System.Xml;
-using System.Data.Entity;
-using Reader.DataService;
-using Reader.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Reader.Controllers {
 
