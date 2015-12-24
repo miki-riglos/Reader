@@ -29,22 +29,20 @@ namespace Reader.Models {
         public string Title { get; set; }
         public string ImageUrl { get; set; }
         public List<UserFeedItemViewModel> Items { get; set; }
-        public DateTimeOffset LoadTime { get; set; }
 
-        public UserFeedViewModel(UserFeed userFeed, DateTimeOffset loadTime) {
+        public UserFeedViewModel(UserFeed userFeed) {
             UserFeedId = userFeed.UserFeedId;
             Title = userFeed.Feed.Title;
             ImageUrl = userFeed.Feed.ImageUrl;
             Items = userFeed.Items.Select(ufi => new UserFeedItemViewModel(ufi)).ToList();
-            LoadTime = loadTime;
         }
     }
 
     public class ReaderViewModel {
         public List<UserFeedViewModel> UserFeeds { get; set; }
 
-        public ReaderViewModel(List<UserFeed> userFeeds, DateTimeOffset loadTime) {
-            UserFeeds = userFeeds.Select(uf => new UserFeedViewModel(uf, loadTime)).ToList();
+        public ReaderViewModel(List<UserFeed> userFeeds) {
+            UserFeeds = userFeeds.Select(uf => new UserFeedViewModel(uf)).ToList();
         }
     }
 

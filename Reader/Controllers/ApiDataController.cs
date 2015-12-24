@@ -20,9 +20,8 @@ namespace Reader.Controllers {
         [HttpPost]
         public UserFeedViewModel AddUserFeed([FromBody]AddUserFeedViewModel addUserFeedViewModel) {
             var userFeed = readerDataService.AddUserFeed(User.Identity.Name, addUserFeedViewModel.FeedUrl);
-            var loadTime = DateTimeOffset.Now;
 
-            var feedViewModel = new UserFeedViewModel(userFeed, loadTime);
+            var feedViewModel = new UserFeedViewModel(userFeed);
             
             return feedViewModel;
         }
@@ -31,11 +30,20 @@ namespace Reader.Controllers {
         [HttpPost]
         public UserFeedViewModel RefreshUserFeed(int userFeedId) {
             var userFeed = readerDataService.RefreshUserFeed(User.Identity.Name, userFeedId);
-            var loadTime = DateTimeOffset.Now;
 
-            var feedViewModel = new UserFeedViewModel(userFeed, loadTime);
+            var feedViewModel = new UserFeedViewModel(userFeed);
 
             return feedViewModel;
+        }
+
+        [Route("api/UserFeed/{userFeedId}/items")]
+        [HttpGet]
+        public List<UserFeedItemViewModel> LoadUserFeedItems(int userFeedId, int skip) {
+            var userFeedItems = readerDataService.LoadUserFeedItems(User.Identity.Name, userFeedId, skip);
+
+            var feedItemsViewModel = userFeedItems.Select(ufi => new UserFeedItemViewModel(ufi)).ToList();
+
+            return feedItemsViewModel;
         }
 
         [Route("api/UserFeed/{userFeedId}")]

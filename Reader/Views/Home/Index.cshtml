@@ -23,7 +23,7 @@
         }
 
     #newUserFeedUrl {
-        width: 245px;
+        width: 225px;
     }
 
     tr.bold {
@@ -40,13 +40,16 @@
     </h4>
 
     <div class="row">
-        <div class="col-md-4" data-bind="css: { 'col-md-4': !editMode(), 'col-md-6': editMode }">
+        <div class="col-md-3" data-bind="css: { 'col-md-3': !editMode(), 'col-md-4': editMode }">
             <!-- feeds -->
             <ul data-bind="foreach: userFeeds" class="list-group">
                 <li data-bind="click: $parent.selectedUserFeed, css: { active: $data === $parent.selectedUserFeed() }" class="list-group-item">
                     <span style="display: none" data-bind="visible: true, if: $root.editMode() && userFeedId">
                         <button data-bind="click: refresh, enable: refresh.isEnabled" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                        </button>
+                        <button data-bind="click: loadItems, enable: loadItems.isEnabled" class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
                         </button>
                         <button data-bind="click: remove, enable: remove.isEnabled" class="btn btn-danger btn-xs">
                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
@@ -78,14 +81,14 @@
             </div>
         </div>
 
-        <div class="col-md-8" data-bind="css: { 'col-md-8': !editMode(), 'col-md-6': editMode }">
+        <div class="col-md-9" data-bind="css: { 'col-md-9': !editMode(), 'col-md-8': editMode }">
             <!-- feed items -->
-            <table data-bind="with: selectedUserFeed" class="table table-bordered">
+            <table data-bind="with: selectedUserFeed" class="table table-bordered table-condensed">
                 <thead>
                     <tr>
                         <th data-bind="visible: showFeedTitle">Feed</th>
                         <th>Title</th>
-                        <th>Publish Date</th>
+                        <th style="white-space: nowrap">Publish Date</th>
                         <th>Read</th>
                     </tr>
                 </thead>

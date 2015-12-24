@@ -11,6 +11,8 @@ namespace Reader.DataService {
 
     public class ReaderDataService : IDisposable {
 
+        private const int PAGE_ROWS = 10;
+
         private ReaderContext _readerContext = new ReaderContext();
 
         private Feed loadFeed(string feedUrl) {
@@ -65,7 +67,7 @@ namespace Reader.DataService {
                                                 .Include(ufi => ufi.FeedItem)
                                                 .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
                                                 .OrderByDescending(ufi => ufi.FeedItemId)
-                                                .Take(20)
+                                                .Take(PAGE_ROWS)
                                                 .ToList();
             }
 
@@ -94,10 +96,15 @@ namespace Reader.DataService {
                     IsRead = false
                 }).ToList()
             };
-            userFeed.Items = userFeed.Items.OrderByDescending(ufi => ufi.FeedItemId).ToList();
 
             _readerContext.UserFeeds.Add(userFeed);
             _readerContext.SaveChanges();
+
+            // order and limit items
+            userFeed.Items = userFeed.Items
+                                .OrderByDescending(ufi => ufi.FeedItemId)
+                                .Take(PAGE_ROWS)
+                                .ToList();
 
             return userFeed;
         }
@@ -117,6 +124,7 @@ namespace Reader.DataService {
             // insert new user feed items 
             var recentFeedItems = _readerContext
                                     .FeedItems
+                                    .Where(fi => fi.FeedId == userFeed.FeedId)
                                     .Where(fi => !_readerContext.UserFeedItems
                                                                 .Where(ufi => ufi.UserFeedId == userFeedId)
                                                                 .Select(ufi => ufi.FeedItemId)
@@ -139,10 +147,21 @@ namespace Reader.DataService {
                                             .Include(ufi => ufi.FeedItem)
                                             .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
                                             .OrderByDescending(ufi => ufi.FeedItemId)
-                                            .Take(20)
+                                            .Take(PAGE_ROWS)
                                             .ToList();
 
             return userFeed;
+        }
+
+        public List<UserFeedItem> LoadUserFeedItems(string userName, int userFeedId, int skip) {
+            var userFeedItems = _readerContext.UserFeedItems
+                                                .Include(ufi => ufi.FeedItem.Feed)
+                                                .Where(ufi => ufi.UserFeedId == userFeedId)
+                                                .OrderByDescending(ufi => ufi.FeedItemId)
+                                                .Skip(skip)
+                                                .Take(PAGE_ROWS)
+                                                .ToList();
+            return userFeedItems;
         }
 
         public int DeleteUserFeed(string userName, int userFeedId) {
@@ -160,7 +179,7 @@ namespace Reader.DataService {
 
         public UserFeedItem UpdateUserFeedItem(string userName, UserFeedItemViewModel userFeedItemViewModel) {
             var userFeedItem = _readerContext.UserFeedItems
-                                                .Include(ufi => ufi.FeedItem)
+                                                .Include(ufi => ufi.FeedItem.Feed)
                                                 .Include(ufi => ufi.UserFeed)
                                                 .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
 

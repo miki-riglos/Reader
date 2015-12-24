@@ -13,6 +13,12 @@
         return promise;
     }
 
+    function loadUserFeedItems(userFeedId, skip) {
+        var data = { skip: skip };
+        var promise = request(BASE_URI + 'UserFeed/' + userFeedId + '/items', 'GET', data);
+        return promise;
+    }
+
     function deleteUserFeed(userFeedId) {
         var promise = request(BASE_URI + 'UserFeed/' + userFeedId, 'DELETE');
         return promise;
@@ -27,6 +33,7 @@
     return {
         addUserFeed: addUserFeed,
         refreshUserFeed: refreshUserFeed,
+        loadUserFeedItems: loadUserFeedItems,
         deleteUserFeed: deleteUserFeed,
         updateUserFeedItem: updateUserFeedItem
     };

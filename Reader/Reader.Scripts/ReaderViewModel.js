@@ -1,12 +1,11 @@
-﻿define(['knockout', 'readerDataService'], function(ko, readerDataService) {
+﻿define(['Q', 'knockout', 'readerDataService'], function(Q, ko, readerDataService) {
 
     function UserFeedItemViewModel(userFeedItemData, feedTitle, readerViewModel) {
         var self = this;
         self.userFeedItemId = userFeedItemData.userFeedItemId;
         self.fullUrl = userFeedItemData.fullUrl;
         self.title = userFeedItemData.title;
-        // TODO: format date
-        self.publishDate = userFeedItemData.publishDate;
+        self.publishDate = userFeedItemData.publishDate.split('T')[0];
 
         var _isRead = ko.observable(userFeedItemData.isRead);
         self.isRead = ko.computed({
@@ -46,13 +45,11 @@
         self.userFeedId = userFeedData.userFeedId;
         self.title = ko.observable(userFeedData.title);
         self.imageUrl = ko.observable(userFeedData.imageUrl);
-        
+
         self.items = ko.observableArray();
         userFeedData.items.forEach(function(itemData) {
             self.items.push(new UserFeedItemViewModel(itemData, userFeedData.title));
         });
-
-        self.loadTime = userFeedData.loadTime;
 
         self.unreadQuantity = ko.computed(function() {
             return self.items().filter(function(item) { return !item.isRead(); }).length;
@@ -64,7 +61,7 @@
         self.refresh = function() {
             readerViewModel.alert(null);
             self.refresh.isEnabled(false);
-            readerDataService.refreshUserFeed(self.userFeedId)
+            return readerDataService.refreshUserFeed(self.userFeedId)
                 .then(function(data) {
                     self.title(data.title);
                     self.imageUrl(data.imageUrl);
@@ -73,7 +70,6 @@
                             self.items.unshift(new UserFeedItemViewModel(itemData, userFeedData.title));
                         }
                     });
-                    self.loadTime = data.loadTime;
                 })
                 .catch(function(err) {
                     readerViewModel.alert(err.message);
@@ -83,6 +79,25 @@
                 });
         };
         self.refresh.isEnabled = ko.observable(true);
+
+        // load more items
+        self.loadItems = function() {
+            readerViewModel.alert(null);
+            self.loadItems.isEnabled(false);
+            readerDataService.loadUserFeedItems(self.userFeedId, self.items().length)
+                .then(function(data) {
+                    data.forEach(function(itemData) {
+                        self.items.push(new UserFeedItemViewModel(itemData, self.title));
+                    });
+                })
+                .catch(function(err) {
+                    readerViewModel.alert(err.message);
+                })
+                .finally(function() {
+                    self.loadItems.isEnabled(true);
+                });
+        };
+        self.loadItems.isEnabled = ko.observable(true);
 
         // delete
         self.remove = function() {
@@ -101,11 +116,9 @@
                 });
         };
         self.remove.isEnabled = ko.observable(true);
-
-        // load more items
     }
 
-    function UserFeedAllViewModel(feeds) {
+    function UserFeedAllViewModel(userFeeds) {
         var self = this;
         self.userFeedId = null;
         self.title = 'ALL';
@@ -114,9 +127,9 @@
         self.items = ko.computed({
             read: function() {
                 var allItems = [];
-                feeds().forEach(function(feed) {
-                    if (feed.userFeedId) {
-                        allItems = allItems.concat(feed.items());
+                userFeeds().forEach(function(userFeed) {
+                    if (userFeed.userFeedId) {
+                        allItems = allItems.concat(userFeed.items());
                     }
                 });
                 allItems.sort(function(itemLeft, itemRight) { return itemLeft.publishDate > itemRight.publishDate ? -1 : itemLeft.publishDate < itemRight.publishDate ? 1 : 0; });
@@ -125,14 +138,12 @@
             deferEvaluation: true
         });
 
-        self.loadTime = null;
-
         self.unreadQuantity = ko.computed({
             read: function() {
                 var allUnreadQuantity = 0;
-                feeds().forEach(function(feed) {
-                    if (feed.userFeedId) {
-                        allUnreadQuantity += feed.unreadQuantity();
+                userFeeds().forEach(function(userFeed) {
+                    if (userFeed.userFeedId) {
+                        allUnreadQuantity += userFeed.unreadQuantity();
                     }
                 });
                 return allUnreadQuantity;
@@ -141,8 +152,6 @@
         });
 
         self.showFeedTitle = true;
-
-        // update + refresh all
     }
 
     function ReaderViewModel(readerData) {
@@ -187,6 +196,19 @@
         self.clearAlert = function() {
             self.alert(null);
         };
+
+        // refresh all feeds sequentially
+        self.refreshAllUserFeeds = function() {
+            var promise = Q();
+            self.userFeeds().forEach(function(userFeed) {
+                if (userFeed.userFeedId) {
+                    promise = promise.then(function() {
+                        return userFeed.refresh();
+                    });
+                }
+            });
+        };
+        self.refreshAllUserFeeds();
     }
 
     return ReaderViewModel;

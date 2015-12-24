@@ -21,9 +21,8 @@ namespace Reader.Controllers {
 
         public ActionResult Index() {
             var userFeeds = readerDataService.GetUserFeeds(User.Identity.Name);
-            var loadTime = DateTimeOffset.Now;
 
-            var readerViewModel = new ReaderViewModel(userFeeds, loadTime);
+            var readerViewModel = new ReaderViewModel(userFeeds);
 
             return View(readerViewModel);
         }
