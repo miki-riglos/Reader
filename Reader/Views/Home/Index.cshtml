@@ -23,7 +23,7 @@
         }
 
     #newUserFeedUrl {
-        width: 225px;
+        width: 215px;
     }
 
     tr.bold {
@@ -31,9 +31,9 @@
     }
 </style>
 
-<div id="readerApp" class="row">
+<div id="readerApp">
     <h4>
-        <button data-bind="click: toggleEditMode" class=" btn btn-default">
+        <button data-bind="click: toggleEditMode" type="button" class=" btn btn-default">
             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
         </button>
         Feeds
@@ -45,16 +45,16 @@
             <ul data-bind="foreach: userFeeds" class="list-group">
                 <li data-bind="click: $parent.selectedUserFeed, css: { active: $data === $parent.selectedUserFeed() }" class="list-group-item">
                     <span style="display: none" data-bind="visible: true, if: $root.editMode() && userFeedId">
-                        <button data-bind="click: refresh, enable: refresh.isEnabled" class="btn btn-default btn-xs" title="Refresh">
+                        <button data-bind="click: refresh, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         </button>
-                        <button data-bind="click: updateItemsAsRead, enable: updateItemsAsRead.isEnabled" class="btn btn-default btn-xs" title="Update all items as read">
+                        <button data-bind="click: updateItemsAsRead, enable: updateItemsAsRead.isEnabled" type="button" class="btn btn-default btn-xs" title="Update all items as read">
                             <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
                         </button>
-                        <button data-bind="click: loadItems, enable: loadItems.isEnabled" class="btn btn-default btn-xs" title="Load more items">
+                        <button data-bind="click: loadItems, enable: loadItems.isEnabled" type="button" class="btn btn-default btn-xs" title="Load more items">
                             <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
                         </button>
-                        <button data-bind="click: remove, enable: remove.isEnabled" class="btn btn-danger btn-xs" title="Delete feed">
+                        <button data-bind="click: remove, enable: remove.isEnabled" type="button" class="btn btn-danger btn-xs" title="Delete feed">
                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                         </button>
                     </span>
@@ -70,7 +70,7 @@
             <!-- add feed -->
             <div class="form-inline">
                 <input data-bind="value: newUserFeedUrl, enable: addUserFeed.isEnabled" type="text" id="newUserFeedUrl" class="form-control" placeholder="New feed URL" />
-                <button data-bind="click: addUserFeed, enable: addUserFeed.isEnabled" class="btn btn-default">
+                <button data-bind="click: addUserFeed, enable: addUserFeed.isEnabled" type="button" class="btn btn-default">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
             </div>
