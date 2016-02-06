@@ -23,11 +23,24 @@
         }
 
     #newUserFeedUrl {
-        width: 215px;
+        width: calc(100% - 45px);
+        display: inline-block;      /* override responsive bootstrap for certain breakpoints */
+        max-width: none;            /* override responsive bootstrap for certain breakpoints */
     }
 
     tr.bold {
         font-weight: bold;
+    }
+
+    .feed-title {
+        display: inline-block;
+        width: calc(100% - 48px);
+        white-space: nowrap;
+        overflow: hidden;
+        -ms-text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+        vertical-align: middle;
     }
 </style>
 
@@ -44,7 +57,13 @@
             <!-- feeds -->
             <ul data-bind="foreach: userFeeds" class="list-group">
                 <li data-bind="click: $parent.selectedUserFeed, css: { active: $data === $parent.selectedUserFeed() }" class="list-group-item">
-                    <span style="display: none" data-bind="visible: true, if: $root.editMode() && userFeedId">
+                    <span class="image-container">
+                        <img data-bind="attr: { src: imageUrl }" />
+                    </span>
+                    <span data-bind="html: title" class="feed-title"></span>
+                    <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
+
+                    <div style="display: none; margin: 5px 20px 0;" data-bind="visible: true, if: $root.editMode() && userFeedId">
                         <button data-bind="click: refresh, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         </button>
@@ -57,13 +76,7 @@
                         <button data-bind="click: remove, enable: remove.isEnabled" type="button" class="btn btn-danger btn-xs" title="Delete feed">
                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                         </button>
-                    </span>
-
-                    <span class="image-container">
-                        <img data-bind="attr: { src: imageUrl }" />
-                    </span>
-                    <span data-bind="html: title"></span>
-                    <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
+                    </div>
                 </li>
             </ul>
 

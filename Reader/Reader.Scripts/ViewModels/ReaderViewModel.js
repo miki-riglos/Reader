@@ -43,14 +43,11 @@
             self.alert(null);
         };
 
-        // refresh all feeds sequentially
+        // refresh all feeds in parallel
         self.refreshAllUserFeeds = function() {
-            var promise = Q();
             self.userFeeds().forEach(function(userFeed) {
                 if (userFeed.userFeedId) {
-                    promise = promise.then(function() {
-                        return userFeed.refresh();
-                    });
+                    userFeed.refresh();
                 }
             });
         };
