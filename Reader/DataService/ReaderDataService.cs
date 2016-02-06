@@ -28,7 +28,7 @@ namespace Reader.DataService {
                 feed.LoadTime = loadTime;
 
                 feed.Items = syndicationFeed.Items.Reverse().Select(i => new FeedItem() {
-                    Url = i.Links.First().Uri.OriginalString,
+                    Url = i.Links.Last().Uri.OriginalString,
                     Title = i.Title.Text,
                     PublishDate = i.PublishDate > DateTimeOffset.MinValue ? i.PublishDate : i.LastUpdatedTime,
                     LoadTime = loadTime
