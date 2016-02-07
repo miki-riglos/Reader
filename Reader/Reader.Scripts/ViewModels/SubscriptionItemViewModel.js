@@ -1,22 +1,22 @@
 ﻿define(['knockout', 'DataService/readerDataService'], function(ko, readerDataService) {
 
-    function UserFeedItemViewModel(userFeedItemData, feedTitle, readerViewModel) {
+    function SubscriptionItemViewModel(subscriptionItemData, feedTitle, readerViewModel) {
         var self = this;
-        self.userFeedItemId = userFeedItemData.userFeedItemId;
-        self.fullUrl = userFeedItemData.fullUrl;
-        self.title = userFeedItemData.title;
-        self.publishDate = userFeedItemData.publishDate.split('T')[0];
+        self.subscriptionItemId = subscriptionItemData.subscriptionItemId;
+        self.fullUrl = subscriptionItemData.fullUrl;
+        self.title = subscriptionItemData.title;
+        self.publishDate = subscriptionItemData.publishDate.split('T')[0];
 
-        var _isRead = ko.observable(userFeedItemData.isRead);
+        var _isRead = ko.observable(subscriptionItemData.isRead);
         self.isRead = ko.computed({
             read: _isRead,
             write: function() {
                 self.isRead.isEnabled(false);
-                var userFeedItem = {
-                    userFeedItemId: self.userFeedItemId,
+                var subscriptionItem = {
+                    subscriptionItemId: self.subscriptionItemId,
                     isRead: !_isRead()
                 };
-                updateUserFeedItem(userFeedItem);
+                updateSubscriptionItem(subscriptionItem);
             }
         });
         self.isRead.isEnabled = ko.observable(true);
@@ -31,15 +31,15 @@
         };
 
         self.updateIsRead = function(isRead) {
-            var userFeedItem = {
-                userFeedItemId: self.userFeedItemId,
+            var subscriptionItem = {
+                subscriptionItemId: self.subscriptionItemId,
                 isRead: isRead
             };
-            return updateUserFeedItem(userFeedItem);
+            return updateSubscriptionItem(subscriptionItem);
         }
 
-        function updateUserFeedItem(userFeedItem) {
-            return readerDataService.updateUserFeedItem(userFeedItem)
+        function updateSubscriptionItem(subscriptionItem) {
+            return readerDataService.updateSubscriptionItem(subscriptionItem)
                 .then(function(data) {
                     _isRead(data.isRead);
                 })
@@ -52,5 +52,5 @@
         }
     }
 
-    return UserFeedItemViewModel;
+    return SubscriptionItemViewModel;
 });

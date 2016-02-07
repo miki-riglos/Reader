@@ -192,8 +192,8 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="DataService\ReaderDataService.cs" />
-    <Compile Include="Entities\UserFeedItem.cs" />
-    <Compile Include="Entities\UserFeed.cs" />
+    <Compile Include="Entities\SubscriptionItem.cs" />
+    <Compile Include="Entities\Subscription.cs" />
     <Compile Include="Entities\FeedItem.cs" />
     <Compile Include="Entities\Feed.cs" />
     <Compile Include="Entities\ReaderContext.cs" />
@@ -205,10 +205,10 @@
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="ViewModels\AddUserFeedViewModel.cs" />
+    <Compile Include="ViewModels\AddSubscriptionViewModel.cs" />
     <Compile Include="ViewModels\ReaderViewModel.cs" />
-    <Compile Include="ViewModels\UserFeedItemViewModel.cs" />
-    <Compile Include="ViewModels\UserFeedViewModel.cs" />
+    <Compile Include="ViewModels\SubscriptionItemViewModel.cs" />
+    <Compile Include="ViewModels\SubscriptionViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />
@@ -231,9 +231,9 @@
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Reader.Scripts\Transfer\request.js" />
     <Content Include="Reader.Scripts\DataService\readerDataService.js" />
-    <Content Include="Reader.Scripts\ViewModels\UserFeedAllViewModel.js" />
-    <Content Include="Reader.Scripts\ViewModels\UserFeedViewModel.js" />
-    <Content Include="Reader.Scripts\ViewModels\UserFeedItemViewModel.js" />
+    <Content Include="Reader.Scripts\ViewModels\SubscriptionAllViewModel.js" />
+    <Content Include="Reader.Scripts\ViewModels\SubscriptionViewModel.js" />
+    <Content Include="Reader.Scripts\ViewModels\SubscriptionItemViewModel.js" />
     <Content Include="Reader.Scripts\ViewModels\ReaderViewModel.js" />
     <Content Include="Reader.Scripts\main.js" />
     <Content Include="Scripts\bootstrap.js" />

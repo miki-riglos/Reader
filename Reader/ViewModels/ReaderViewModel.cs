@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace Reader.ViewModels {
     public class ReaderViewModel {
-        public List<UserFeedViewModel> UserFeeds { get; set; }
+        public List<SubscriptionViewModel> Subscriptions { get; set; }
 
-        public ReaderViewModel(List<UserFeed> userFeeds) {
-            UserFeeds = userFeeds.Select(uf => new UserFeedViewModel(uf)).ToList();
+        public ReaderViewModel(List<Subscription> subscriptions) {
+            Subscriptions = subscriptions.Select(uf => new SubscriptionViewModel(uf)).ToList();
         }
     }
 }

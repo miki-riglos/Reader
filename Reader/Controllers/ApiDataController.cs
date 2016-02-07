@@ -11,51 +11,51 @@ namespace Reader.Controllers {
 
         ReaderDataService readerDataService = new ReaderDataService();
 
-        [Route("api/UserFeed")]
+        [Route("api/Subscription")]
         [HttpPost]
-        public UserFeedViewModel AddUserFeed([FromBody]AddUserFeedViewModel addUserFeedViewModel) {
-            var userFeed = readerDataService.AddUserFeed(User.Identity.Name, addUserFeedViewModel.FeedUrl);
+        public SubscriptionViewModel AddSubscription([FromBody]AddSubscriptionViewModel addSubscriptionViewModel) {
+            var subscription = readerDataService.AddSubscription(User.Identity.Name, addSubscriptionViewModel.FeedUrl);
 
-            var feedViewModel = new UserFeedViewModel(userFeed);
+            var subscriptionViewModel = new SubscriptionViewModel(subscription);
             
-            return feedViewModel;
+            return subscriptionViewModel;
         }
 
-        [Route("api/UserFeed/{userFeedId}/refresh")]
+        [Route("api/Subscription/{subscriptionId}/refresh")]
         [HttpPost]
-        public UserFeedViewModel RefreshUserFeed(int userFeedId) {
-            var userFeed = readerDataService.RefreshUserFeed(User.Identity.Name, userFeedId);
+        public SubscriptionViewModel RefreshSubscription(int subscriptionId) {
+            var subscription = readerDataService.RefreshSubscription(User.Identity.Name, subscriptionId);
 
-            var feedViewModel = new UserFeedViewModel(userFeed);
+            var subscriptionViewModel = new SubscriptionViewModel(subscription);
 
-            return feedViewModel;
+            return subscriptionViewModel;
         }
 
-        [Route("api/UserFeed/{userFeedId}/items")]
+        [Route("api/Subscription/{subscriptionId}/items")]
         [HttpGet]
-        public List<UserFeedItemViewModel> LoadUserFeedItems(int userFeedId, int skip) {
-            var userFeedItems = readerDataService.LoadUserFeedItems(User.Identity.Name, userFeedId, skip);
+        public List<SubscriptionItemViewModel> LoadSubscriptionItems(int subscriptionId, int skip) {
+            var subscriptionItems = readerDataService.LoadSubscriptionItems(User.Identity.Name, subscriptionId, skip);
 
-            var feedItemsViewModel = userFeedItems.Select(ufi => new UserFeedItemViewModel(ufi)).ToList();
+            var subscriptionItemsViewModel = subscriptionItems.Select(ufi => new SubscriptionItemViewModel(ufi)).ToList();
 
-            return feedItemsViewModel;
+            return subscriptionItemsViewModel;
         }
 
-        [Route("api/UserFeed/{userFeedId}")]
+        [Route("api/Subscription/{subscriptionId}")]
         [HttpDelete]
-        public int DeleteUserFeed(int userFeedId) {
-            var deleteResult = readerDataService.DeleteUserFeed(User.Identity.Name, userFeedId);
+        public int DeleteSubscription(int subscriptionId) {
+            var deleteResult = readerDataService.DeleteSubscription(User.Identity.Name, subscriptionId);
             return deleteResult;
         }
-        
-        [Route("api/UserFeedItem")]
+
+        [Route("api/SubscriptionItem")]
         [HttpPut]
-        public UserFeedItemViewModel UpdateUserFeedItem([FromBody]UserFeedItemViewModel userFeedItemViewModel) {
-            var userFeedItem = readerDataService.UpdateUserFeedItem(User.Identity.Name, userFeedItemViewModel);
+        public SubscriptionItemViewModel UpdateSubscriptionItem([FromBody]SubscriptionItemViewModel subscriptionItemViewModel) {
+            var subscriptionItem = readerDataService.UpdateSubscriptionItem(User.Identity.Name, subscriptionItemViewModel);
 
-            var feedItemViewModel = new UserFeedItemViewModel(userFeedItem);
+            var updatedSubscriptionViewModel = new SubscriptionItemViewModel(subscriptionItem);
 
-            return feedItemViewModel;
+            return updatedSubscriptionViewModel;
         }
     }
 }

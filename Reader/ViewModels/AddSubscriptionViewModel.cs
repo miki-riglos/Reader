@@ -1,7 +1,7 @@
 ﻿
 namespace Reader.ViewModels {
 
-    public class AddUserFeedViewModel {
+    public class AddSubscriptionViewModel {
         public string FeedUrl { get; set; }
     }
 }

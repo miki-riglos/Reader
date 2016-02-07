@@ -6,8 +6,8 @@ namespace Reader.Entities {
 
         public DbSet<Feed> Feeds { get; set; }
         public DbSet<FeedItem> FeedItems { get; set; }
-        public DbSet<UserFeed> UserFeeds { get; set; }
-        public DbSet<UserFeedItem> UserFeedItems { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<SubscriptionItem> SubscriptionItems { get; set; }
 
         public ReaderContext()
             : base("DefaultConnection") {

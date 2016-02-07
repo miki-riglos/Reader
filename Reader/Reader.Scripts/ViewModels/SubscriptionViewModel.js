@@ -1,14 +1,14 @@
-﻿define(['Q', 'knockout', './UserFeedItemViewModel', 'DataService/readerDataService'], function(Q, ko, UserFeedItemViewModel, readerDataService) {
+﻿define(['Q', 'knockout', './SubscriptionItemViewModel', 'DataService/readerDataService'], function(Q, ko, SubscriptionItemViewModel, readerDataService) {
 
-    function UserFeedViewModel(userFeedData, readerViewModel) {
+    function SubscriptionViewModel(subscriptionData, readerViewModel) {
         var self = this;
-        self.userFeedId = userFeedData.userFeedId;
-        self.title = ko.observable(userFeedData.title);
-        self.imageUrl = ko.observable(userFeedData.imageUrl);
+        self.subscriptionId = subscriptionData.subscriptionId;
+        self.title = ko.observable(subscriptionData.title);
+        self.imageUrl = ko.observable(subscriptionData.imageUrl);
 
         self.items = ko.observableArray();
-        userFeedData.items.forEach(function(itemData) {
-            self.items.push(new UserFeedItemViewModel(itemData, userFeedData.title));
+        subscriptionData.items.forEach(function(itemData) {
+            self.items.push(new SubscriptionItemViewModel(itemData, subscriptionData.title));
         });
 
         self.unreadQuantity = ko.computed(function() {
@@ -21,13 +21,13 @@
         self.refresh = function() {
             readerViewModel.alert(null);
             self.refresh.isEnabled(false);
-            return readerDataService.refreshUserFeed(self.userFeedId)
+            return readerDataService.refreshSubscription(self.subscriptionId)
                 .then(function(data) {
                     self.title(data.title);
                     self.imageUrl(data.imageUrl);
                     data.items.reverse().forEach(function(itemData) {
-                        if (self.items().filter(function(item) { return item.userFeedItemId === itemData.userFeedItemId; }).length === 0) {
-                            self.items.unshift(new UserFeedItemViewModel(itemData, userFeedData.title));
+                        if (self.items().filter(function(item) { return item.subscriptionItemId === itemData.subscriptionItemId; }).length === 0) {
+                            self.items.unshift(new SubscriptionItemViewModel(itemData, subscriptionData.title));
                         }
                     });
                 })
@@ -62,10 +62,10 @@
         self.loadItems = function() {
             readerViewModel.alert(null);
             self.loadItems.isEnabled(false);
-            readerDataService.loadUserFeedItems(self.userFeedId, self.items().length)
+            readerDataService.loadSubscriptionItems(self.subscriptionId, self.items().length)
                 .then(function(data) {
                     data.forEach(function(itemData) {
-                        self.items.push(new UserFeedItemViewModel(itemData, self.title));
+                        self.items.push(new SubscriptionItemViewModel(itemData, self.title));
                     });
                 })
                 .catch(function(err) {
@@ -81,10 +81,10 @@
         self.remove = function() {
             readerViewModel.alert(null);
             self.remove.isEnabled(false);
-            readerDataService.deleteUserFeed(self.userFeedId)
+            readerDataService.deleteSubscription(self.subscriptionId)
                 .then(function(data) {
-                    readerViewModel.selectedUserFeed(readerViewModel.userFeeds()[0]);
-                    readerViewModel.userFeeds.remove(self);
+                    readerViewModel.selectedSubscription(readerViewModel.subscriptions()[0]);
+                    readerViewModel.subscriptions.remove(self);
                 })
                 .catch(function(err) {
                     readerViewModel.alert(err.message);
@@ -96,5 +96,5 @@
         self.remove.isEnabled = ko.observable(true);
     }
 
-    return UserFeedViewModel;
+    return SubscriptionViewModel;
 });

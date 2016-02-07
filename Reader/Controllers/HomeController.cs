@@ -10,9 +10,9 @@ namespace Reader.Controllers {
         ReaderDataService readerDataService = new ReaderDataService();
 
         public ActionResult Index() {
-            var userFeeds = readerDataService.GetUserFeeds(User.Identity.Name);
+            var subscriptions = readerDataService.GetSubscriptions(User.Identity.Name);
 
-            var readerViewModel = new ReaderViewModel(userFeeds);
+            var readerViewModel = new ReaderViewModel(subscriptions);
 
             return View(readerViewModel);
         }

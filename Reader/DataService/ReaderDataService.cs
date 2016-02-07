@@ -56,25 +56,25 @@ namespace Reader.DataService {
             _readerContext.SaveChanges();
         }
 
-        public List<UserFeed> GetUserFeeds(string userName) {
-            var userFeeds = _readerContext.UserFeeds
-                                            .Include(uf => uf.Feed)
-                                            .Where(uf => uf.UserName == userName)
-                                            .ToList();
-
-            foreach (var userFeed in userFeeds) {
-                userFeed.Items = _readerContext.UserFeedItems
-                                                .Include(ufi => ufi.FeedItem)
-                                                .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
-                                                .OrderByDescending(ufi => ufi.FeedItemId)
-                                                .Take(PAGE_ROWS)
+        public List<Subscription> GetSubscriptions(string userName) {
+            var subscriptions = _readerContext.Subscriptions
+                                                .Include(uf => uf.Feed)
+                                                .Where(uf => uf.UserName == userName)
                                                 .ToList();
+
+            foreach (var subscription in subscriptions) {
+                subscription.Items = _readerContext.SubscriptionItems
+                                                    .Include(ufi => ufi.FeedItem)
+                                                    .Where(ufi => ufi.SubscriptionId == subscription.SubscriptionId)
+                                                    .OrderByDescending(ufi => ufi.FeedItemId)
+                                                    .Take(PAGE_ROWS)
+                                                    .ToList();
             }
 
-            return userFeeds;
+            return subscriptions;
         }
 
-        public UserFeed AddUserFeed(string userName, string feedUrl) {
+        public Subscription AddSubscription(string userName, string feedUrl) {
             // load or create feed
             var feed = _readerContext.Feeds.Include(f => f.Items).FirstOrDefault(f => f.Url == feedUrl);
             if (feed == null) {
@@ -83,114 +83,114 @@ namespace Reader.DataService {
                 _readerContext.SaveChanges();
             }
 
-            // create user feed, if not exists
-            var userFeed = _readerContext.UserFeeds.FirstOrDefault(uf => uf.UserName == userName && uf.FeedId == feed.FeedId);
-            if (userFeed != null) {
-                throw new ApplicationException("User Feed already exists.");
+            // create subscription, if not exists
+            var subscription = _readerContext.Subscriptions.FirstOrDefault(uf => uf.UserName == userName && uf.FeedId == feed.FeedId);
+            if (subscription != null) {
+                throw new ApplicationException("Subscription already exists.");
             }
-            userFeed = new UserFeed() {
+            subscription = new Subscription() {
                 UserName = userName,
                 Feed = feed,
-                Items = feed.Items.Select(i => new UserFeedItem() {
+                Items = feed.Items.Select(i => new SubscriptionItem() {
                     FeedItemId = i.FeedItemId,
                     IsRead = false
                 }).ToList()
             };
 
-            _readerContext.UserFeeds.Add(userFeed);
+            _readerContext.Subscriptions.Add(subscription);
             _readerContext.SaveChanges();
 
             // order and limit items
-            userFeed.Items = userFeed.Items
-                                .OrderByDescending(ufi => ufi.FeedItemId)
-                                .Take(PAGE_ROWS)
-                                .ToList();
+            subscription.Items = subscription.Items
+                                                .OrderByDescending(ufi => ufi.FeedItemId)
+                                                .Take(PAGE_ROWS)
+                                                .ToList();
 
-            return userFeed;
+            return subscription;
         }
 
-        public UserFeed RefreshUserFeed(string userName, int userFeedId) {
-            var userFeed = _readerContext.UserFeeds
-                                            .Include(uf => uf.Items)
-                                            .First(uf => uf.UserFeedId == userFeedId);
+        public Subscription RefreshSubscription(string userName, int subscriptionId) {
+            var subscription = _readerContext.Subscriptions
+                                                .Include(uf => uf.Items)
+                                                .First(uf => uf.SubscriptionId == subscriptionId);
                 
-            if (userFeed.UserName != userName) {
-                throw new ApplicationException("Invalid User Feed Id.");
+            if (subscription.UserName != userName) {
+                throw new ApplicationException("Invalid Subscription Id.");
             }
 
             // refresh feed
-            refreshFeed(userFeed.FeedId);
+            refreshFeed(subscription.FeedId);
 
-            // insert new user feed items 
+            // insert new subscription items 
             var recentFeedItems = _readerContext
                                     .FeedItems
-                                    .Where(fi => fi.FeedId == userFeed.FeedId)
-                                    .Where(fi => !_readerContext.UserFeedItems
-                                                                .Where(ufi => ufi.UserFeedId == userFeedId)
+                                    .Where(fi => fi.FeedId == subscription.FeedId)
+                                    .Where(fi => !_readerContext.SubscriptionItems
+                                                                .Where(ufi => ufi.SubscriptionId == subscriptionId)
                                                                 .Select(ufi => ufi.FeedItemId)
                                                                 .Contains(fi.FeedItemId));
             foreach (var recentFeedItem in recentFeedItems) {
-                var userFeedItem = new UserFeedItem();
-                userFeedItem.UserFeedId = userFeedId;
-                userFeedItem.FeedItemId = recentFeedItem.FeedItemId;
-                userFeedItem.IsRead = false;
-                _readerContext.UserFeedItems.Add(userFeedItem);
+                var subscriptionItem = new SubscriptionItem();
+                subscriptionItem.SubscriptionId = subscriptionId;
+                subscriptionItem.FeedItemId = recentFeedItem.FeedItemId;
+                subscriptionItem.IsRead = false;
+                _readerContext.SubscriptionItems.Add(subscriptionItem);
             }
             _readerContext.SaveChanges();
 
-            // re-load user feed with fresh items
-            userFeed = _readerContext.UserFeeds
-                                        .Include(uf => uf.Feed)
-                                        .First(uf => uf.UserFeedId == userFeedId);
+            // re-load subscription with fresh items
+            subscription = _readerContext.Subscriptions
+                                            .Include(uf => uf.Feed)
+                                            .First(uf => uf.SubscriptionId == subscriptionId);
 
-            userFeed.Items = _readerContext.UserFeedItems
-                                            .Include(ufi => ufi.FeedItem)
-                                            .Where(ufi => ufi.UserFeedId == userFeed.UserFeedId)
-                                            .OrderByDescending(ufi => ufi.FeedItemId)
-                                            .Take(PAGE_ROWS)
-                                            .ToList();
-
-            return userFeed;
-        }
-
-        public List<UserFeedItem> LoadUserFeedItems(string userName, int userFeedId, int skip) {
-            var userFeedItems = _readerContext.UserFeedItems
-                                                .Include(ufi => ufi.FeedItem.Feed)
-                                                .Where(ufi => ufi.UserFeedId == userFeedId)
+            subscription.Items = _readerContext.SubscriptionItems
+                                                .Include(ufi => ufi.FeedItem)
+                                                .Where(ufi => ufi.SubscriptionId == subscription.SubscriptionId)
                                                 .OrderByDescending(ufi => ufi.FeedItemId)
-                                                .Skip(skip)
                                                 .Take(PAGE_ROWS)
                                                 .ToList();
-            return userFeedItems;
+
+            return subscription;
         }
 
-        public int DeleteUserFeed(string userName, int userFeedId) {
-            var userFeed = _readerContext.UserFeeds.Include(uf => uf.Items).First(uf => uf.UserFeedId == userFeedId);
+        public List<SubscriptionItem> LoadSubscriptionItems(string userName, int subscriptionId, int skip) {
+            var subscriptionItems = _readerContext.SubscriptionItems
+                                                    .Include(ufi => ufi.FeedItem.Feed)
+                                                    .Where(ufi => ufi.SubscriptionId == subscriptionId)
+                                                    .OrderByDescending(ufi => ufi.FeedItemId)
+                                                    .Skip(skip)
+                                                    .Take(PAGE_ROWS)
+                                                    .ToList();
+            return subscriptionItems;
+        }
+
+        public int DeleteSubscription(string userName, int subscriptionId) {
+            var subscription = _readerContext.Subscriptions.Include(uf => uf.Items).First(uf => uf.SubscriptionId == subscriptionId);
                 
-            if (userFeed.UserName != userName) {
-                throw new ApplicationException("Invalid User Feed Id.");
+            if (subscription.UserName != userName) {
+                throw new ApplicationException("Invalid Subscription Id.");
             }
 
-            _readerContext.UserFeeds.Remove(userFeed);
+            _readerContext.Subscriptions.Remove(subscription);
             var deleteResult = _readerContext.SaveChanges();
 
             return deleteResult;
         }
 
-        public UserFeedItem UpdateUserFeedItem(string userName, UserFeedItemViewModel userFeedItemViewModel) {
-            var userFeedItem = _readerContext.UserFeedItems
-                                                .Include(ufi => ufi.FeedItem.Feed)
-                                                .Include(ufi => ufi.UserFeed)
-                                                .First(ufi => ufi.UserFeedItemId == userFeedItemViewModel.UserFeedItemId);
+        public SubscriptionItem UpdateSubscriptionItem(string userName, SubscriptionItemViewModel subscriptionItemViewModel) {
+            var subscriptionItem = _readerContext.SubscriptionItems
+                                                    .Include(ufi => ufi.FeedItem.Feed)
+                                                    .Include(ufi => ufi.Subscription)
+                                                    .First(ufi => ufi.SubscriptionItemId == subscriptionItemViewModel.SubscriptionItemId);
 
-            if (userFeedItem.UserFeed.UserName != userName) {
-                throw new ApplicationException("Invalid User Feed Item.");
+            if (subscriptionItem.Subscription.UserName != userName) {
+                throw new ApplicationException("Invalid Subscription Item.");
             }
 
-            userFeedItem.IsRead = userFeedItemViewModel.IsRead;
+            subscriptionItem.IsRead = subscriptionItemViewModel.IsRead;
             _readerContext.SaveChanges();
 
-            return userFeedItem;
+            return subscriptionItem;
         }
 
         // IDisposable implementation

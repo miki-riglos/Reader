@@ -1,16 +1,16 @@
-﻿define(['Q', 'knockout', './UserFeedViewModel', './UserFeedAllViewModel', 'DataService/readerDataService'], function(Q, ko, UserFeedViewModel, UserFeedAllViewModel, readerDataService) {
+﻿define(['Q', 'knockout', './SubscriptionViewModel', './SubscriptionAllViewModel', 'DataService/readerDataService'], function(Q, ko, SubscriptionViewModel, SubscriptionAllViewModel, readerDataService) {
 
     function ReaderViewModel(readerData) {
         var self = this;
 
         // user feeds
-        self.userFeeds = ko.observableArray([]);
-        readerData.userFeeds.forEach(function(userFeedData) {
-            self.userFeeds.push(new UserFeedViewModel(userFeedData, self));
+        self.subscriptions = ko.observableArray([]);
+        readerData.subscriptions.forEach(function(subscriptionData) {
+            self.subscriptions.push(new SubscriptionViewModel(subscriptionData, self));
         });
-        self.userFeeds.unshift(new UserFeedAllViewModel(self.userFeeds));
+        self.subscriptions.unshift(new SubscriptionAllViewModel(self.subscriptions));
 
-        self.selectedUserFeed = ko.observable(self.userFeeds()[0]);
+        self.selectedSubscription = ko.observable(self.subscriptions()[0]);
 
         // edit mode
         self.editMode = ko.observable(false);
@@ -19,23 +19,23 @@
         };
 
         // new feed
-        self.newUserFeedUrl = ko.observable(null);
-        self.addUserFeed = function() {
+        self.newFeedUrl = ko.observable(null);
+        self.addSubscription = function() {
             self.alert(null);
-            self.addUserFeed.isEnabled(false);
-            readerDataService.addUserFeed(self.newUserFeedUrl())
+            self.addSubscription.isEnabled(false);
+            readerDataService.addSubscription(self.newFeedUrl())
                 .then(function(data) {
-                    self.userFeeds.push(new UserFeedViewModel(data, self));
-                    self.newUserFeedUrl(null);
+                    self.subscriptions.push(new SubscriptionViewModel(data, self));
+                    self.newFeedUrl(null);
                 })
                 .catch(function(err) {
                     self.alert(err.message);
                 })
                 .finally(function() {
-                    self.addUserFeed.isEnabled(true);
+                    self.addSubscription.isEnabled(true);
                 });
         };
-        self.addUserFeed.isEnabled = ko.observable(true);
+        self.addSubscription.isEnabled = ko.observable(true);
 
         // alert
         self.alert = ko.observable(null);
@@ -44,14 +44,14 @@
         };
 
         // refresh all feeds in parallel
-        self.refreshAllUserFeeds = function() {
-            self.userFeeds().forEach(function(userFeed) {
-                if (userFeed.userFeedId) {
-                    userFeed.refresh();
+        self.refreshAllSubscriptions = function() {
+            self.subscriptions().forEach(function(subscription) {
+                if (subscription.subscriptionId) {
+                    subscription.refresh();
                 }
             });
         };
-        self.refreshAllUserFeeds();
+        self.refreshAllSubscriptions();
     }
 
     return ReaderViewModel;
