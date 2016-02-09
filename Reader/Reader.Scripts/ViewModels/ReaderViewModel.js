@@ -3,7 +3,7 @@
     function ReaderViewModel(readerData) {
         var self = this;
 
-        // user feeds
+        // subscriptions
         self.subscriptions = ko.observableArray([]);
         readerData.subscriptions.forEach(function(subscriptionData) {
             self.subscriptions.push(new SubscriptionViewModel(subscriptionData, self));
@@ -18,7 +18,7 @@
             self.editMode(!self.editMode());
         };
 
-        // new feed
+        // new feed subscription
         self.newFeedUrl = ko.observable(null);
         self.addSubscription = function() {
             self.alert(null);
@@ -43,7 +43,7 @@
             self.alert(null);
         };
 
-        // refresh all feeds in parallel
+        // refresh all subscriptions in parallel
         self.refreshAllSubscriptions = function() {
             self.subscriptions().forEach(function(subscription) {
                 if (subscription.subscriptionId) {

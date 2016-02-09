@@ -40,19 +40,17 @@
         };
         self.refresh.isEnabled = ko.observable(true);
 
-        // update all items as read sequentially
+        // update all items as read in parallel
         self.updateItemsAsRead = function() {
-            var promise = Q();
+            var promises = [];
             readerViewModel.alert(null);
             self.updateItemsAsRead.isEnabled(false);
             self.items().forEach(function(item) {
                 if (!item.isRead()) {
-                    promise = promise.then(function() {
-                        return item.updateIsRead(true);
-                    });
+                    promises.push(item.updateIsRead(true));
                 }
             });
-            promise.then(function() {
+            Q.allSettled(promises).finally(function () {
                 self.updateItemsAsRead.isEnabled(true);
             });
         };

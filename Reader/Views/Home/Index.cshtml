@@ -12,25 +12,22 @@
         margin-top: 20px;
     }
 
-    .image-container {
+    #newFeedUrl {
+        width: calc(100% - 45px);
+        /* override responsive bootstrap for certain breakpoints */
+        display: inline-block;
+        max-width: none;
+    }
+
+    .feed-image-container {
         display: inline-block;
         width: 16px;
         height: 16px;
     }
 
-        .image-container img {
+        .feed-image-container img {
             width: 16px;
         }
-
-    #newFeedUrl {
-        width: calc(100% - 45px);
-        display: inline-block;      /* override responsive bootstrap for certain breakpoints */
-        max-width: none;            /* override responsive bootstrap for certain breakpoints */
-    }
-
-    tr.bold {
-        font-weight: bold;
-    }
 
     .feed-title {
         display: inline-block;
@@ -41,6 +38,18 @@
         -o-text-overflow: ellipsis;
         text-overflow: ellipsis;
         vertical-align: middle;
+    }
+
+    .feed-toolbar {
+        margin: 5px 20px 0;
+    }
+
+    th {
+        white-space: nowrap;
+    }
+
+    tr.bold {
+        font-weight: bold;
     }
 </style>
 
@@ -53,17 +62,17 @@
     </h4>
 
     <div class="row">
-        <div class="col-md-3" data-bind="css: { 'col-md-3': !editMode(), 'col-md-4': editMode }">
-            <!-- feeds -->
+        <div class="col-md-3">
+            <!-- subscriptions -->
             <ul data-bind="foreach: subscriptions" class="list-group">
                 <li data-bind="click: $parent.selectedSubscription, css: { active: $data === $parent.selectedSubscription() }" class="list-group-item">
-                    <span class="image-container">
+                    <span class="feed-image-container">
                         <img data-bind="attr: { src: imageUrl }" />
                     </span>
                     <span data-bind="html: title" class="feed-title"></span>
                     <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
 
-                    <div style="display: none; margin: 5px 20px 0;" data-bind="visible: true, if: $root.editMode() && subscriptionId">
+                    <div style="display: none;" data-bind="visible: true, if: $root.editMode() && subscriptionId" class="feed-toolbar">
                         <button data-bind="click: refresh, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         </button>
@@ -97,14 +106,14 @@
             </div>
         </div>
 
-        <div class="col-md-9" data-bind="css: { 'col-md-9': !editMode(), 'col-md-8': editMode }">
-            <!-- feed items -->
+        <div class="col-md-9">
+            <!-- subscription items -->
             <table data-bind="with: selectedSubscription" class="table table-bordered table-condensed">
                 <thead>
                     <tr>
                         <th data-bind="visible: showFeedTitle">Feed</th>
                         <th>Title</th>
-                        <th style="white-space: nowrap">Publish Date</th>
+                        <th>Publish Date</th>
                         <th>Read</th>
                     </tr>
                 </thead>
