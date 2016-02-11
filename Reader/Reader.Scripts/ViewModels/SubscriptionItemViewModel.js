@@ -23,16 +23,16 @@
                 isRead: !self.isRead()
             };
             self.toggleIsRead.isEnabled(false);
-            readerDataService.updateSubscriptionItem(subscriptionItem)
-                .then(function(data) {
-                    self.isRead(data.isRead);
-                })
-                .catch(function(err) {
-                    readerViewModel.addAlert(self.title + ': ' + err.message);
-                })
-                .finally(function() {
-                    self.toggleIsRead.isEnabled(true);
-                });
+            return readerDataService.updateSubscriptionItem(subscriptionItem)
+                    .then(function(data) {
+                        self.isRead(data.isRead);
+                    })
+                    .catch(function(err) {
+                        readerViewModel.addAlert(self.title + ': ' + err.message);
+                    })
+                    .finally(function() {
+                        self.toggleIsRead.isEnabled(true);
+                    });
         };
         self.toggleIsRead.isEnabled = ko.observable(true);
     }

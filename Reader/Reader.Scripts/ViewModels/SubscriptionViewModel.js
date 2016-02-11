@@ -45,7 +45,7 @@
             self.updateItemsAsRead.isEnabled(false);
             self.items().forEach(function(item) {
                 if (!item.isRead()) {
-                    promises.push(item.updateIsRead(true));
+                    promises.push(item.toggleIsRead());
                 }
             });
             Q.allSettled(promises).finally(function () {
