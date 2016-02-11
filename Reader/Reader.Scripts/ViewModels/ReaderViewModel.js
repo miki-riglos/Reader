@@ -21,7 +21,6 @@
         // new feed subscription
         self.newFeedUrl = ko.observable(null);
         self.addSubscription = function() {
-            self.alert(null);
             self.addSubscription.isEnabled(false);
             readerDataService.addSubscription(self.newFeedUrl())
                 .then(function(data) {
@@ -29,7 +28,7 @@
                     self.newFeedUrl(null);
                 })
                 .catch(function(err) {
-                    self.alert(err.message);
+                    self.addAlert('New feed URL: ' + err.message);
                 })
                 .finally(function() {
                     self.addSubscription.isEnabled(true);
@@ -37,11 +36,12 @@
         };
         self.addSubscription.isEnabled = ko.observable(true);
 
-        // alert
-        self.alert = ko.observable(null);
-        self.clearAlert = function() {
-            self.alert(null);
+        // alerts
+        self.alerts = ko.observableArray([]);
+        self.addAlert = function(message) {
+            self.alerts.push({ message: message });
         };
+        self.removeAlert = function(alert) { self.alerts.remove(alert); };
 
         // refresh all subscriptions in parallel
         self.refreshAllSubscriptions = function() {

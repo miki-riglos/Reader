@@ -8,17 +8,6 @@
 }
 
 <style>
-    #alertContainer {
-        margin-top: 20px;
-    }
-
-    #newFeedUrl {
-        width: calc(100% - 45px);
-        /* override responsive bootstrap for certain breakpoints */
-        display: inline-block;
-        max-width: none;
-    }
-
     .feed-image-container {
         display: inline-block;
         width: 16px;
@@ -42,6 +31,25 @@
 
     .feed-toolbar {
         margin: 5px 20px 0;
+    }
+
+    .feed-add-form {
+        margin-bottom: 30px;
+    }
+
+    .feed-add-form .feed-add-url {
+        width: calc(100% - 45px);
+        /* override responsive bootstrap for certain breakpoints */
+        display: inline-block;
+        max-width: none;
+    }
+
+    .feed-alert-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 100;
+        width: 400px;
     }
 
     th {
@@ -90,19 +98,11 @@
             </ul>
 
             <!-- add feed -->
-            <div class="form-inline">
-                <input data-bind="value: newFeedUrl, enable: addSubscription.isEnabled" type="text" id="newFeedUrl" class="form-control" placeholder="New feed URL" />
+            <div class="form-inline feed-add-form">
+                <input data-bind="value: newFeedUrl, enable: addSubscription.isEnabled" type="text" class="form-control feed-add-url" placeholder="New feed URL" />
                 <button data-bind="click: addSubscription, enable: addSubscription.isEnabled" type="button" class="btn btn-default">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </button>
-            </div>
-
-            <!-- alert -->
-            <div id="alertContainer" style="display: none" data-bind="visible: true, if: alert">
-                <div class="alert alert-danger" role="alert">
-                    <button data-bind="click: clearAlert" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <span data-bind="html: alert"></span>
-                </div>
             </div>
         </div>
 
@@ -122,10 +122,22 @@
                         <td data-bind="html: feedTitle, visible: $parent.showFeedTitle"></td>
                         <td><a data-bind="html: title, attr: { href: fullUrl, target: '_blank' }, click: markAsRead"></a></td>
                         <td data-bind="html: publishDate"></td>
-                        <td><input type="checkbox" data-bind="checked: isRead, enable: isRead.isEnabled" /></td>
+                        <td class="text-center">
+                            <button data-bind="click: toggleIsRead, enable: toggleIsRead.isEnabled" type="button" class="btn btn-default btn-xs" title="Toggle Read flag">
+                                <span data-bind="css: { 'glyphicon-check': isRead, 'glyphicon-unchecked': !isRead() }" class="glyphicon" aria-hidden="true"></span>
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- alerts -->
+    <div style="display: none;" data-bind="visible: true, foreach: alerts" class="feed-alert-container">
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <button data-bind="click: $parent.removeAlert" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span data-bind="html: message"></span>
         </div>
     </div>
 </div>

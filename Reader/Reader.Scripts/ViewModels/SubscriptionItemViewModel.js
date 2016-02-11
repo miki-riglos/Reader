@@ -6,50 +6,35 @@
         self.fullUrl = subscriptionItemData.fullUrl;
         self.title = subscriptionItemData.title;
         self.publishDate = subscriptionItemData.publishDate.split('T')[0];
-
-        var _isRead = ko.observable(subscriptionItemData.isRead);
-        self.isRead = ko.computed({
-            read: _isRead,
-            write: function() {
-                self.isRead.isEnabled(false);
-                var subscriptionItem = {
-                    subscriptionItemId: self.subscriptionItemId,
-                    isRead: !_isRead()
-                };
-                updateSubscriptionItem(subscriptionItem);
-            }
-        });
-        self.isRead.isEnabled = ko.observable(true);
+        self.isRead = ko.observable(subscriptionItemData.isRead);
 
         self.feedTitle = feedTitle;
 
         self.markAsRead = function() {
-            if (!_isRead()) {
-                self.isRead(true);
+            if (!self.isRead()) {
+                self.toggleIsRead();
             }
             return true;    // don't prevent default, allow click on anchor
         };
 
-        self.updateIsRead = function(isRead) {
+        self.toggleIsRead = function() {
             var subscriptionItem = {
                 subscriptionItemId: self.subscriptionItemId,
-                isRead: isRead
+                isRead: !self.isRead()
             };
-            return updateSubscriptionItem(subscriptionItem);
-        }
-
-        function updateSubscriptionItem(subscriptionItem) {
-            return readerDataService.updateSubscriptionItem(subscriptionItem)
+            self.toggleIsRead.isEnabled(false);
+            readerDataService.updateSubscriptionItem(subscriptionItem)
                 .then(function(data) {
-                    _isRead(data.isRead);
+                    self.isRead(data.isRead);
                 })
                 .catch(function(err) {
-                    readerViewModel.alert(err.message);
+                    readerViewModel.addAlert(self.title + ': ' + err.message);
                 })
                 .finally(function() {
-                    self.isRead.isEnabled(true);
+                    self.toggleIsRead.isEnabled(true);
                 });
-        }
+        };
+        self.toggleIsRead.isEnabled = ko.observable(true);
     }
 
     return SubscriptionItemViewModel;

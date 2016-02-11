@@ -8,7 +8,7 @@
 
         self.items = ko.observableArray();
         subscriptionData.items.forEach(function(itemData) {
-            self.items.push(new SubscriptionItemViewModel(itemData, subscriptionData.title));
+            self.items.push(new SubscriptionItemViewModel(itemData, subscriptionData.title, readerViewModel));
         });
 
         self.unreadQuantity = ko.computed(function() {
@@ -19,7 +19,6 @@
 
         // refresh
         self.refresh = function() {
-            readerViewModel.alert(null);
             self.refresh.isEnabled(false);
             return readerDataService.refreshSubscription(self.subscriptionId)
                 .then(function(data) {
@@ -32,7 +31,7 @@
                     });
                 })
                 .catch(function(err) {
-                    readerViewModel.alert(err.message);
+                    readerViewModel.addAlert(self.title() + ': ' + err.message);
                 })
                 .finally(function() {
                     self.refresh.isEnabled(true);
@@ -43,7 +42,6 @@
         // update all items as read in parallel
         self.updateItemsAsRead = function() {
             var promises = [];
-            readerViewModel.alert(null);
             self.updateItemsAsRead.isEnabled(false);
             self.items().forEach(function(item) {
                 if (!item.isRead()) {
@@ -58,7 +56,6 @@
 
         // load more items
         self.loadItems = function() {
-            readerViewModel.alert(null);
             self.loadItems.isEnabled(false);
             readerDataService.loadSubscriptionItems(self.subscriptionId, self.items().length)
                 .then(function(data) {
@@ -67,7 +64,7 @@
                     });
                 })
                 .catch(function(err) {
-                    readerViewModel.alert(err.message);
+                    readerViewModel.addAlert(self.title() + ': ' + err.message);
                 })
                 .finally(function() {
                     self.loadItems.isEnabled(true);
@@ -77,7 +74,6 @@
 
         // delete
         self.remove = function() {
-            readerViewModel.alert(null);
             self.remove.isEnabled(false);
             readerDataService.deleteSubscription(self.subscriptionId)
                 .then(function(data) {
@@ -85,7 +81,7 @@
                     readerViewModel.subscriptions.remove(self);
                 })
                 .catch(function(err) {
-                    readerViewModel.alert(err.message);
+                    readerViewModel.addAlert(self.title() + ': ' + err.message);
                 })
                 .finally(function() {
                     self.remove.isEnabled(true);
