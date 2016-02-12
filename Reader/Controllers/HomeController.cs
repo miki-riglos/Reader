@@ -1,5 +1,6 @@
 ﻿using Reader.DataService;
 using Reader.ViewModels;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace Reader.Controllers {
@@ -9,8 +10,8 @@ namespace Reader.Controllers {
 
         ReaderDataService readerDataService = new ReaderDataService();
 
-        public ActionResult Index() {
-            var subscriptions = readerDataService.GetSubscriptions(User.Identity.Name);
+        public async Task<ActionResult> Index() {
+            var subscriptions = await readerDataService.GetSubscriptionsAsync(User.Identity.Name);
 
             var readerViewModel = new ReaderViewModel(subscriptions);
 

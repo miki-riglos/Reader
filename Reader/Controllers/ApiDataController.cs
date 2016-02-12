@@ -2,6 +2,7 @@
 using Reader.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace Reader.Controllers {
@@ -13,8 +14,8 @@ namespace Reader.Controllers {
 
         [Route("api/Subscription")]
         [HttpPost]
-        public SubscriptionViewModel AddSubscription([FromBody]AddSubscriptionViewModel addSubscriptionViewModel) {
-            var subscription = readerDataService.AddSubscription(User.Identity.Name, addSubscriptionViewModel.FeedUrl);
+        public async Task<SubscriptionViewModel> AddSubscription([FromBody]AddSubscriptionViewModel addSubscriptionViewModel) {
+            var subscription = await readerDataService.AddSubscriptionAsync(User.Identity.Name, addSubscriptionViewModel.FeedUrl);
 
             var subscriptionViewModel = new SubscriptionViewModel(subscription);
             
@@ -23,8 +24,8 @@ namespace Reader.Controllers {
 
         [Route("api/Subscription/{subscriptionId}/refresh")]
         [HttpPost]
-        public SubscriptionViewModel RefreshSubscription(int subscriptionId) {
-            var subscription = readerDataService.RefreshSubscription(User.Identity.Name, subscriptionId);
+        public async Task<SubscriptionViewModel> RefreshSubscription(int subscriptionId) {
+            var subscription = await readerDataService.RefreshSubscriptionAsync(User.Identity.Name, subscriptionId);
 
             var subscriptionViewModel = new SubscriptionViewModel(subscription);
 
@@ -33,8 +34,8 @@ namespace Reader.Controllers {
 
         [Route("api/Subscription/{subscriptionId}/items")]
         [HttpGet]
-        public List<SubscriptionItemViewModel> LoadSubscriptionItems(int subscriptionId, int skip) {
-            var subscriptionItems = readerDataService.LoadSubscriptionItems(User.Identity.Name, subscriptionId, skip);
+        public async Task<List<SubscriptionItemViewModel>> LoadSubscriptionItems(int subscriptionId, int skip) {
+            var subscriptionItems = await readerDataService.LoadSubscriptionItemsAsync(User.Identity.Name, subscriptionId, skip);
 
             var subscriptionItemsViewModel = subscriptionItems.Select(ufi => new SubscriptionItemViewModel(ufi)).ToList();
 
@@ -43,15 +44,15 @@ namespace Reader.Controllers {
 
         [Route("api/Subscription/{subscriptionId}")]
         [HttpDelete]
-        public int DeleteSubscription(int subscriptionId) {
-            var deleteResult = readerDataService.DeleteSubscription(User.Identity.Name, subscriptionId);
+        public async Task<int> DeleteSubscription(int subscriptionId) {
+            var deleteResult = await readerDataService.DeleteSubscription(User.Identity.Name, subscriptionId);
             return deleteResult;
         }
 
         [Route("api/SubscriptionItem")]
         [HttpPut]
-        public SubscriptionItemViewModel UpdateSubscriptionItem([FromBody]SubscriptionItemViewModel subscriptionItemViewModel) {
-            var subscriptionItem = readerDataService.UpdateSubscriptionItem(User.Identity.Name, subscriptionItemViewModel);
+        public async Task<SubscriptionItemViewModel> UpdateSubscriptionItem([FromBody]SubscriptionItemViewModel subscriptionItemViewModel) {
+            var subscriptionItem = await readerDataService.UpdateSubscriptionItemAsync(User.Identity.Name, subscriptionItemViewModel);
 
             var updatedSubscriptionViewModel = new SubscriptionItemViewModel(subscriptionItem);
 
