@@ -19,6 +19,18 @@ namespace Reader.DataService {
             var feed = new Feed();
             var loadTime = DateTimeOffset.Now;
 
+            Func<SyndicationItem, string> getItemUrl = (item) => {
+                Uri itemUri;
+                var alternateLink = item.Links.FirstOrDefault(link => link.RelationshipType == null || link.RelationshipType.Equals("alternate", StringComparison.OrdinalIgnoreCase));
+                if (alternateLink != null) {
+                    itemUri = alternateLink.Uri;
+                }
+                else {
+                    itemUri = new Uri(item.Id, UriKind.Absolute);
+                }
+                return itemUri.ToString();
+            };
+
             using (var reader = XmlReader.Create(feedUrl)) {
                 var syndicationFeed = SyndicationFeed.Load(reader);
                 feed.Url = feedUrl;
@@ -27,10 +39,10 @@ namespace Reader.DataService {
                 feed.LastUpdatedTime = syndicationFeed.LastUpdatedTime;
                 feed.LoadTime = loadTime;
 
-                feed.Items = syndicationFeed.Items.Reverse().Select(i => new FeedItem() {
-                    Url = i.Links.Last().Uri.OriginalString,
-                    Title = i.Title.Text,
-                    PublishDate = i.PublishDate > DateTimeOffset.MinValue ? i.PublishDate : i.LastUpdatedTime,
+                feed.Items = syndicationFeed.Items.Reverse().Select(item => new FeedItem() {
+                    Url = getItemUrl(item),
+                    Title = item.Title.Text,
+                    PublishDate = item.PublishDate > DateTimeOffset.MinValue ? item.PublishDate : item.LastUpdatedTime,
                     LoadTime = loadTime
                 }).ToList();
             }
