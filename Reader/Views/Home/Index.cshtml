@@ -49,7 +49,7 @@
         top: 80px;
         right: 20px;
         z-index: 100;
-        width: 400px;
+        width: 320px;
     }
 
     th {
@@ -74,11 +74,11 @@
             <!-- subscriptions -->
             <ul data-bind="foreach: subscriptions" class="list-group">
                 <li data-bind="click: $parent.selectedSubscription, css: { active: $data === $parent.selectedSubscription() }" class="list-group-item">
+                    <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
                     <span class="feed-image-container">
                         <img data-bind="attr: { src: imageUrl }" />
                     </span>
                     <span data-bind="html: title" class="feed-title"></span>
-                    <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
 
                     <div style="display: none;" data-bind="visible: true, if: $root.editMode() && subscriptionId" class="feed-toolbar">
                         <button data-bind="click: refresh, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
@@ -111,17 +111,17 @@
             <table data-bind="with: selectedSubscription" class="table table-bordered table-condensed">
                 <thead>
                     <tr>
-                        <th data-bind="visible: showFeedTitle">Feed</th>
+                        <th data-bind="visible: showFeedTitle" class="hidden-xs">Feed</th>
                         <th>Title</th>
-                        <th>Publish Date</th>
+                        <th class="hidden-xs">Publish Date</th>
                         <th>Read</th>
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: items">
                     <tr data-bind="css: { active: !isRead(), bold: !isRead() }">
-                        <td data-bind="html: feedTitle, visible: $parent.showFeedTitle"></td>
+                        <td data-bind="html: feedTitle, visible: $parent.showFeedTitle" class="hidden-xs"></td>
                         <td><a data-bind="html: title, attr: { href: fullUrl, target: '_blank' }, click: markAsRead"></a></td>
-                        <td data-bind="html: publishDate"></td>
+                        <td data-bind="html: publishDate" class="hidden-xs"></td>
                         <td class="text-center">
                             <button data-bind="click: toggleIsRead, enable: toggleIsRead.isEnabled" type="button" class="btn btn-default btn-xs" title="Toggle Read flag">
                                 <span data-bind="css: { 'glyphicon-check': isRead, 'glyphicon-unchecked': !isRead() }" class="glyphicon" aria-hidden="true"></span>
