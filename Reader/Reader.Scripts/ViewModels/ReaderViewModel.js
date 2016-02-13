@@ -3,20 +3,17 @@
     function ReaderViewModel(readerData) {
         var self = this;
 
+        self.DEFAULT_IMAGE_URL = './Content/feed.png';
+
         // subscriptions
         self.subscriptions = ko.observableArray([]);
         readerData.subscriptions.forEach(function(subscriptionData) {
             self.subscriptions.push(new SubscriptionViewModel(subscriptionData, self));
         });
-        self.subscriptions.unshift(new SubscriptionAllViewModel(self.subscriptions));
+        var subscriptionAll = new SubscriptionAllViewModel(self.subscriptions, self);
+        self.subscriptions.unshift(subscriptionAll);
 
-        self.selectedSubscription = ko.observable(self.subscriptions()[0]);
-
-        // edit mode
-        self.editMode = ko.observable(false);
-        self.toggleEditMode = function() {
-            self.editMode(!self.editMode());
-        };
+        self.selectedSubscription = ko.observable(subscriptionAll);
 
         // new feed subscription
         self.newFeedUrl = ko.observable(null);
@@ -43,15 +40,20 @@
         };
         self.removeAlert = function(alert) { self.alerts.remove(alert); };
 
-        // refresh all subscriptions in parallel
-        self.refreshAllSubscriptions = function() {
-            self.subscriptions().forEach(function(subscription) {
-                if (subscription.subscriptionId) {
-                    subscription.refresh();
-                }
-            });
+        // responsive methods
+        self.selectingFeedInSmall = ko.observable(false);
+        self.toggleSelectingFeedInSmall = function() {
+            self.selectingFeedInSmall(!self.selectingFeedInSmall());
         };
-        self.refreshAllSubscriptions();
+
+        self.selectedSubscription.subscribe(function() {
+            if (self.selectingFeedInSmall()) {
+                self.toggleSelectingFeedInSmall();
+            }
+        });
+
+        // refresh all subscriptions in parallel
+        subscriptionAll.refresh();
     }
 
     return ReaderViewModel;

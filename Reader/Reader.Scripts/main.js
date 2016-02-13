@@ -15,6 +15,7 @@ require(['knockout', 'readerData', 'ViewModels/ReaderViewModel'], function(ko, r
     };
 
     var readerViewModel = new ReaderViewModel(readerData);
+
     // update document title when unread quantity changes
     var subscriptionAll = readerViewModel.subscriptions()[0];
     subscriptionAll.unreadQuantity.subscribe(updateDocumentTitle);

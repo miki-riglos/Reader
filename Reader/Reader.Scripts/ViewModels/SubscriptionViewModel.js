@@ -4,7 +4,7 @@
         var self = this;
         self.subscriptionId = subscriptionData.subscriptionId;
         self.title = ko.observable(subscriptionData.title);
-        self.imageUrl = ko.observable(subscriptionData.imageUrl);
+        self.imageUrl = ko.observable(subscriptionData.imageUrl || readerViewModel.DEFAULT_IMAGE_URL);
 
         self.items = ko.observableArray();
         subscriptionData.items.forEach(function(itemData) {
@@ -15,27 +15,33 @@
             return self.items().filter(function(item) { return !item.isRead(); }).length;
         });
 
-        self.showFeedTitle = false;
+        self.isSubscriptionAll = false;
+
+        // edit mode
+        self.editMode = ko.observable(false);
+        self.toggleEditMode = function() {
+            self.editMode(!self.editMode());
+        };
 
         // refresh
         self.refresh = function() {
             self.refresh.isEnabled(false);
             return readerDataService.refreshSubscription(self.subscriptionId)
-                .then(function(data) {
-                    self.title(data.title);
-                    self.imageUrl(data.imageUrl);
-                    data.items.reverse().forEach(function(itemData) {
-                        if (self.items().filter(function(item) { return item.subscriptionItemId === itemData.subscriptionItemId; }).length === 0) {
-                            self.items.unshift(new SubscriptionItemViewModel(itemData, subscriptionData.title));
-                        }
+                    .then(function(data) {
+                        self.title(data.title);
+                        self.imageUrl(data.imageUrl || readerViewModel.DEFAULT_IMAGE_URL);
+                        data.items.reverse().forEach(function(itemData) {
+                            if (self.items().filter(function(item) { return item.subscriptionItemId === itemData.subscriptionItemId; }).length === 0) {
+                                self.items.unshift(new SubscriptionItemViewModel(itemData, subscriptionData.title));
+                            }
+                        });
+                    })
+                    .catch(function(err) {
+                        readerViewModel.addAlert(self.title() + ': ' + err.message);
+                    })
+                    .finally(function() {
+                        self.refresh.isEnabled(true);
                     });
-                })
-                .catch(function(err) {
-                    readerViewModel.addAlert(self.title() + ': ' + err.message);
-                })
-                .finally(function() {
-                    self.refresh.isEnabled(true);
-                });
         };
         self.refresh.isEnabled = ko.observable(true);
 
@@ -48,9 +54,10 @@
                     promises.push(item.toggleIsRead());
                 }
             });
-            Q.allSettled(promises).finally(function () {
-                self.updateItemsAsRead.isEnabled(true);
-            });
+            return Q.allSettled(promises)
+                    .finally(function() {
+                        self.updateItemsAsRead.isEnabled(true);
+                    });
         };
         self.updateItemsAsRead.isEnabled = ko.observable(true);
 

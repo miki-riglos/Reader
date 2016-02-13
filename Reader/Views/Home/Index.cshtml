@@ -20,7 +20,7 @@
 
     .feed-title {
         display: inline-block;
-        width: calc(100% - 55px);
+        width: calc(100% - 84px);
         white-space: nowrap;
         overflow: hidden;
         -ms-text-overflow: ellipsis;
@@ -30,19 +30,19 @@
     }
 
     .feed-toolbar {
-        margin: 5px 20px 0;
+        margin-top: 5px;
     }
 
     .feed-add-form {
         margin-bottom: 30px;
     }
 
-    .feed-add-form .feed-add-url {
-        width: calc(100% - 45px);
-        /* override responsive bootstrap for certain breakpoints */
-        display: inline-block;
-        max-width: none;
-    }
+        .feed-add-form .feed-add-url {
+            width: calc(100% - 45px);
+            /* override responsive bootstrap for certain breakpoints */
+            display: inline-block;
+            max-width: none;
+        }
 
     .feed-alert-container {
         position: fixed;
@@ -62,37 +62,52 @@
 </style>
 
 <div id="readerApp">
-    <h4>
-        <button data-bind="click: toggleEditMode" type="button" class=" btn btn-default">
+    <h3>
+        <button data-bind="click: toggleSelectingFeedInSmall" type="button" class="btn btn-default visible-xs-inline-block visible-sm-inline-block" title="Feeds">
             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
         </button>
         Subscriptions
-    </h4>
+    </h3>
 
-    <div class="row">
-        <div class="col-md-3">
+    <div data-bind="visible: false" class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div style="display: none;" data-bind="visible: true" class="row">
+        <div data-bind="css: { 'hidden-xs hidden-sm': !selectingFeedInSmall() }" class="col-md-4">
             <!-- subscriptions -->
             <ul data-bind="foreach: subscriptions" class="list-group">
                 <li data-bind="click: $parent.selectedSubscription, css: { active: $data === $parent.selectedSubscription() }" class="list-group-item">
+                    <!-- subscription properties -->
                     <span data-bind="text: unreadQuantity, visible: unreadQuantity" class="badge"></span>
+
+                    <button data-bind="click: toggleEditMode, clickBubble: false" type="button" class=" btn btn-default btn-xs" title="Options">
+                        <span data-bind="css: { 'glyphicon-option-vertical': !editMode(), 'glyphicon-option-horizontal': editMode }" class="glyphicon" aria-hidden="true"></span>
+                    </button>
+
                     <span class="feed-image-container">
                         <img data-bind="attr: { src: imageUrl }" />
                     </span>
-                    <span data-bind="html: title" class="feed-title"></span>
+                    <span data-bind="html: title" class="feed-title">ALL</span>
 
-                    <div style="display: none;" data-bind="visible: true, if: $root.editMode() && subscriptionId" class="feed-toolbar">
-                        <button data-bind="click: refresh, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
+                    <!-- subscription toolbar -->
+                    <div data-bind="if: editMode()" class="feed-toolbar">
+                        <button data-bind="click: refresh, clickBubble: false, enable: refresh.isEnabled" type="button" class="btn btn-default btn-xs" title="Refresh">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         </button>
-                        <button data-bind="click: updateItemsAsRead, enable: updateItemsAsRead.isEnabled" type="button" class="btn btn-default btn-xs" title="Update all items as read">
+                        <button data-bind="click: updateItemsAsRead, clickBubble: false, enable: updateItemsAsRead.isEnabled" type="button" class="btn btn-default btn-xs" title="Update all items as read">
                             <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
                         </button>
-                        <button data-bind="click: loadItems, enable: loadItems.isEnabled" type="button" class="btn btn-default btn-xs" title="Load more items">
-                            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-                        </button>
-                        <button data-bind="click: remove, enable: remove.isEnabled" type="button" class="btn btn-danger btn-xs" title="Delete feed">
-                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                        </button>
+                        <span data-bind="if: !isSubscriptionAll">
+                            <button data-bind="click: loadItems, clickBubble: false, enable: loadItems.isEnabled" type="button" class="btn btn-default btn-xs" title="Load more items">
+                                <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                            </button>
+                            <button data-bind="click: remove, clickBubble: false, enable: remove.isEnabled" type="button" class="btn btn-danger btn-xs" title="Delete feed">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            </button>
+                        </span>
                     </div>
                 </li>
             </ul>
@@ -106,12 +121,14 @@
             </div>
         </div>
 
-        <div class="col-md-9">
-            <!-- subscription items -->
-            <table data-bind="with: selectedSubscription" class="table table-bordered table-condensed">
+        <div data-bind="with: selectedSubscription, css: { 'hidden-xs hidden-sm': selectingFeedInSmall }" class="col-md-8">
+            <!-- selectes subscription -->
+            <h4 data-bind="text: title" class="visible-xs-block visible-sm-block"></h4>
+            <!-- items -->
+            <table class="table table-bordered table-condensed">
                 <thead>
                     <tr>
-                        <th data-bind="visible: showFeedTitle" class="hidden-xs">Feed</th>
+                        <th data-bind="visible: isSubscriptionAll" class="hidden-xs">Feed</th>
                         <th>Title</th>
                         <th class="hidden-xs">Publish Date</th>
                         <th>Read</th>
@@ -119,7 +136,7 @@
                 </thead>
                 <tbody data-bind="foreach: items">
                     <tr data-bind="css: { active: !isRead(), bold: !isRead() }">
-                        <td data-bind="html: feedTitle, visible: $parent.showFeedTitle" class="hidden-xs"></td>
+                        <td data-bind="html: feedTitle, visible: $parent.isSubscriptionAll" class="hidden-xs"></td>
                         <td><a data-bind="html: title, attr: { href: fullUrl, target: '_blank' }, click: markAsRead"></a></td>
                         <td data-bind="html: publishDate" class="hidden-xs"></td>
                         <td class="text-center">
