@@ -8,7 +8,7 @@
 
 define('jquery', function() { return jQuery; });    // already loaded in _layout.cshtml
 
-require(['knockout', 'readerData', 'ViewModels/ReaderViewModel'], function(ko, readerData, ReaderViewModel) {
+require(['knockout', 'readerData', 'ViewModels/ReaderViewModel', 'Extensions/registerBindings'], function(ko, readerData, ReaderViewModel) {
     var baseDocumentTitle = document.title;
     var updateDocumentTitle = function(unreadQuantity) {
         document.title = baseDocumentTitle + (unreadQuantity ? ' (' + unreadQuantity + ')' : '');

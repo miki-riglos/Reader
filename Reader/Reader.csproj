@@ -230,6 +230,7 @@
     <Content Include="Content\bootstrap.css.map" />
     <None Include="Properties\PublishProfiles\Reader-app.pubxml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="Reader.Scripts\Extensions\registerBindings.js" />
     <Content Include="Reader.Scripts\Transfer\request.js" />
     <Content Include="Reader.Scripts\DataService\readerDataService.js" />
     <Content Include="Reader.Scripts\ViewModels\SubscriptionAllViewModel.js" />
