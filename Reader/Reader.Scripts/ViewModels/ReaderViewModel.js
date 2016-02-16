@@ -41,6 +41,8 @@
         self.removeAlert = function(alert) { self.alerts.remove(alert); };
 
         // responsive methods
+        self.isSmall = ko.observable();
+
         self.selectingFeedInSmall = ko.observable(false);
         self.toggleSelectingFeedInSmall = function() {
             self.selectingFeedInSmall(!self.selectingFeedInSmall());

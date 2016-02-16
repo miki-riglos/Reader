@@ -20,7 +20,8 @@
                     }
                 };
             };
-            return ko.bindingHandlers['foreach'].update(element, newValueAccessor, allBindings, viewModel, bindingContext);
+            var result = ko.bindingHandlers['foreach'].update(element, newValueAccessor, allBindings, viewModel, bindingContext);
+            return result;
         }
     };
 
@@ -29,9 +30,9 @@
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             var value = ko.unwrap(valueAccessor());
             if (value) {
-                $(element).show(duration);
+                $(element).show();
             } else {
-                $(element).hide(duration);
+                $(element).hide();
             }
         },
         update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
