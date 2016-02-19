@@ -3,7 +3,7 @@
     function ReaderViewModel(readerData) {
         var self = this;
 
-        self.DEFAULT_IMAGE_URL = './Content/feed.png';
+        self.DEFAULT_IMAGE_URL = '/Content/feed.png';
 
         // subscriptions
         self.subscriptions = ko.observableArray([]);
