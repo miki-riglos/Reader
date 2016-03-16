@@ -31,8 +31,10 @@
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
                         <div class="checkbox">
-                            @Html.CheckBoxFor(m => m.RememberMe)
-                            @Html.LabelFor(m => m.RememberMe)
+                            <label>
+                                @Html.CheckBoxFor(m => m.RememberMe)
+                                @(ModelMetadata.FromLambdaExpression<LoginViewModel, bool>(m => m.RememberMe, ViewData).DisplayName)
+                            </label>
                         </div>
                     </div>
                 </div>

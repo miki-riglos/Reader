@@ -18,6 +18,7 @@ namespace Reader.Controllers {
             return View(readerViewModel);
         }
 
+        [AllowAnonymous]
         public ActionResult About() {
             ViewBag.Message = "Reader Application";
             return View();
