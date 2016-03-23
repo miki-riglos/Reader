@@ -15,6 +15,13 @@
             return self.items().filter(function(item) { return !item.isRead(); }).length;
         });
 
+        self.itemsToShow = ko.computed(function() {
+            if (readerViewModel.onlyUnread()) {
+                return self.items().filter(function(item) { return !item.isRead(); });
+            }
+            return self.items();
+        });
+
         self.isSubscriptionAll = false;
 
         // edit mode

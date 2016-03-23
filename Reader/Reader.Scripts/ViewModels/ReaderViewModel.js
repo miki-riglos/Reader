@@ -5,6 +5,12 @@
 
         self.DEFAULT_IMAGE_URL = '/Content/feed.png';
 
+        // only unread
+        self.onlyUnread = ko.observable(false);
+        self.toggleOnlyUnread = function() {
+            self.onlyUnread(!self.onlyUnread());
+        };
+
         // subscriptions
         self.subscriptions = ko.observableArray([]);
         readerData.subscriptions.forEach(function(subscriptionData) {

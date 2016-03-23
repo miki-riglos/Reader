@@ -81,6 +81,10 @@
             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
         </button>
         Subscriptions
+        <button data-bind="click: toggleOnlyUnread" type="button" class="btn btn-default btn-xs pull-right">
+            <span data-bind="css: { 'glyphicon-check': onlyUnread, 'glyphicon-unchecked': !onlyUnread() }" class="glyphicon" aria-hidden="true"></span>
+            Show only unread items
+        </button>
     </h3>
 
     <div data-bind="visible: false" class="progress">
@@ -148,7 +152,7 @@
                         <th>Read</th>
                     </tr>
                 </thead>
-                <tbody data-bind="animatedForeach: items">
+                <tbody data-bind="foreach: itemsToShow">
                     <tr data-bind="css: { active: !isRead(), bold: !isRead() }">
                         <td data-bind="html: feedTitle, visible: $parent.isSubscriptionAll" class="hidden-xs"></td>
                         <td><a data-bind="html: title, attr: { href: fullUrl, target: '_blank' }, click: markAsRead"></a></td>
