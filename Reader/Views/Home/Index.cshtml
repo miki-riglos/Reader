@@ -106,7 +106,7 @@
                     </button>
 
                     <span class="feed-image-container">
-                        <img data-bind="attr: { src: imageUrl }" />
+                        <img data-bind="attr: { src: imageUrl }" onerror="this.src = DEFAULT_IMAGE_URL" />
                     </span>
                     <span data-bind="html: title" class="feed-title">ALL</span>
 

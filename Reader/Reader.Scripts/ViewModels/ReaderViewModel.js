@@ -1,9 +1,11 @@
 ﻿define(['Q', 'knockout', './SubscriptionViewModel', './SubscriptionAllViewModel', 'DataService/readerDataService'], function(Q, ko, SubscriptionViewModel, SubscriptionAllViewModel, readerDataService) {
 
+    window.DEFAULT_IMAGE_URL = '/Content/feed.png';
+
     function ReaderViewModel(readerData) {
         var self = this;
 
-        self.DEFAULT_IMAGE_URL = '/Content/feed.png';
+        self.DEFAULT_IMAGE_URL = window.DEFAULT_IMAGE_URL;
 
         // only unread
         self.onlyUnread = ko.observable(false);
