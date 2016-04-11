@@ -77,13 +77,13 @@
 
 <div id="readerApp">
     <h3>
-        <button data-bind="click: toggleSelectingFeedInSmall" type="button" id="selectFeedButton" class="btn btn-default visible-xs-inline-block visible-sm-inline-block" title="Feeds">
+        <button disabled data-bind="enable: true, click: toggleSelectingFeedInSmall" type="button" id="selectFeedButton" class="btn btn-default visible-xs-inline-block visible-sm-inline-block" title="Feeds">
             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
         </button>
         Subscriptions
-        <button data-bind="click: toggleOnlyUnread" type="button" class="btn btn-default btn-xs pull-right">
+        <button style="display: none;" data-bind="visible: true, click: toggleOnlyUnread" type="button" class="btn btn-default btn-xs pull-right">
             <span data-bind="css: { 'glyphicon-check': onlyUnread, 'glyphicon-unchecked': !onlyUnread() }" class="glyphicon" aria-hidden="true"></span>
-            Show only unread items
+            Only unread
         </button>
     </h3>
 
